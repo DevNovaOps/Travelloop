@@ -1,0 +1,232 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Trips — Travelloop</title>
+  <meta name="description" content="View and manage all your travel trips — ongoing, upcoming, and completed." />
+  <link rel="icon" href="{% static 'assets/images/logo.svg' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/components.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/pages.css' %}" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <!-- ========== SIDEBAR ========== -->
+  <div class="page-layout">
+    <aside class="page-sidebar" id="sidebar">
+      <a href="{% url 'index' %}" class="sidebar__brand">
+        <div class="tl-logo tl-logo--sm">
+          <img src="{% static 'assets/images/logo.svg' %}" alt="Travelloop" />
+        </div>
+        <span class="tl-brand-text" style="font-size:1.25rem;"><span class="text-travel">Travel</span><span class="text-loop">l<span class="text-oo">oo</span>p</span></span>
+      </a>
+      <nav class="sidebar__nav">
+        <a href="{% url 'dashboard' %}" class="sidebar__link" data-section="overview">
+          <i data-lucide="layout-dashboard" style="width:20px;height:20px;"></i> Overview
+        </a>
+        <a href="{% url 'trips' %}" class="sidebar__link active" data-section="trips">
+          <i data-lucide="map" style="width:20px;height:20px;"></i> My Trips
+        </a>
+        <a href="{% url 'create_trip' %}" class="sidebar__link" data-section="create">
+          <i data-lucide="plus-circle" style="width:20px;height:20px;"></i> New Trip
+        </a>
+        <a href="{% url 'packing' %}" class="sidebar__link" data-section="packing">
+          <i data-lucide="check-square" style="width:20px;height:20px;"></i> Packing
+        </a>
+        <a href="{% url 'notes' %}" class="sidebar__link" data-section="notes">
+          <i data-lucide="notebook-pen" style="width:20px;height:20px;"></i> Notes
+        </a>
+        <a href="{% url 'community' %}" class="sidebar__link" data-section="community">
+          <i data-lucide="users" style="width:20px;height:20px;"></i> Community
+        </a>
+        <a href="{% url 'search' %}" class="sidebar__link" data-section="search">
+          <i data-lucide="search" style="width:20px;height:20px;"></i> Explore
+        </a>
+        <a href="{% url 'profile' %}" class="sidebar__link" data-section="profile">
+          <i data-lucide="user" style="width:20px;height:20px;"></i> Profile
+        </a>
+      </nav>
+      <div style="border-top:1px solid var(--glass-border);padding-top:var(--sp-4);margin-top:auto;">
+        <div class="flex items-center gap-3" style="padding:var(--sp-2) var(--sp-3);">
+          <div class="avatar" id="sidebarAvatar">T</div>
+          <div>
+            <div class="text-sm font-semi" id="sidebarName">Traveler</div>
+            <div class="text-xs text-muted" id="sidebarEmail">user@email.com</div>
+          </div>
+          <button class="theme-toggle" id="themeToggle" style="margin-left:auto;width:32px;height:32px;font-size:0.875rem;" aria-label="Toggle theme">
+            <i data-lucide="sun" style="width:16px;height:16px;"></i>
+          </button>
+        </div>
+        <a href="#" class="sidebar__link" style="color:var(--danger);margin-top:var(--sp-2);" onclick="fetch('/api/logout/').then(()=>window.location.href='{% url 'login' %}');">
+          <i data-lucide="log-out" style="width:20px;height:20px;"></i> Sign Out
+        </a>
+      </div>
+    </aside>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="page-content">
+      <div class="section-header">
+        <div>
+          <h1 class="section-header__title">My Trips</h1>
+          <p class="section-header__subtitle">Manage all your travel plans in one place</p>
+        </div>
+        <a href="{% url 'create_trip' %}" class="btn btn--primary">
+          <i data-lucide="plus" style="width:18px;height:18px;"></i> Plan a Trip
+        </a>
+      </div>
+
+      <!-- Search Toolbar -->
+      <div class="search-toolbar">
+        <i data-lucide="search" style="width:18px;height:18px;color:var(--text-dim);flex-shrink:0;"></i>
+        <input class="search-toolbar__input" type="text" placeholder="Search trips..." id="tripSearch" />
+        <div class="search-toolbar__actions">
+          <button class="toolbar-btn"><i data-lucide="layout-grid" style="width:14px;height:14px;"></i> Group by</button>
+          <button class="toolbar-btn"><i data-lucide="filter" style="width:14px;height:14px;"></i> Filter</button>
+          <button class="toolbar-btn"><i data-lucide="arrow-up-down" style="width:14px;height:14px;"></i> Sort by</button>
+        </div>
+      </div>
+
+      <!-- Ongoing Trips -->
+      <div class="trip-status-group" id="ongoingTrips">
+        <div class="trip-status-label trip-status-label--ongoing">
+          <i data-lucide="radio" style="width:16px;height:16px;"></i> Ongoing
+        </div>
+      </div>
+
+      <!-- Upcoming Trips -->
+      <div class="trip-status-group" id="upcomingTrips">
+        <div class="trip-status-label trip-status-label--upcoming">
+          <i data-lucide="calendar-clock" style="width:16px;height:16px;"></i> Upcoming
+        </div>
+      </div>
+
+      <!-- Completed Trips -->
+      <div class="trip-status-group" id="completedTrips">
+        <div class="trip-status-label trip-status-label--completed">
+          <i data-lucide="check-circle-2" style="width:16px;height:16px;"></i> Completed
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="{% static 'js/app.js' %}"></script>
+  <script>
+    const itineraryViewUrl = "{% url 'itinerary_view' %}";
+    const buildItineraryUrl = "{% url 'build_itinerary' %}";
+    const moodLabels = { adventure: 'Adventure', luxury: 'Luxury', nature: 'Nature', budget: 'Budget', nightlife: 'Nightlife' };
+    let allTrips = [];
+
+    // ── User info from API ──
+    (async () => {
+      try {
+        const res = await fetch('/api/profile/');
+        if (res.ok) {
+          const u = await res.json();
+          const name = `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Traveler';
+          const sn = document.getElementById('sidebarName');
+          if (sn) sn.textContent = name;
+          const se = document.getElementById('sidebarEmail');
+          if (se) se.textContent = u.email || '';
+          const sa = document.getElementById('sidebarAvatar');
+          if (sa) sa.textContent = name.charAt(0).toUpperCase();
+        }
+      } catch (e) {}
+    })();
+
+    // ── Load trips from backend ──
+    async function loadTrips() {
+      try {
+        const res = await fetch('/api/trips/');
+        if (!res.ok) throw new Error('Failed to fetch trips');
+        const data = await res.json();
+        allTrips = data.trips || [];
+        renderTrips();
+      } catch (e) {
+        console.error('Load trips error:', e);
+        showToast('Could not load trips', 'error');
+      }
+    }
+
+    function renderTrips(filter = '') {
+      const groups = { ongoing: [], upcoming: [], completed: [] };
+      allTrips.forEach(t => {
+        if (filter && !t.name.toLowerCase().includes(filter.toLowerCase())) return;
+        if (groups[t.status]) groups[t.status].push(t);
+      });
+
+      ['ongoing', 'upcoming', 'completed'].forEach(status => {
+        const container = document.getElementById(status + 'Trips');
+        // Remove old cards
+        container.querySelectorAll('.trip-card').forEach(c => c.remove());
+
+        if (groups[status].length === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'trip-card glass-card';
+          empty.style.justifyContent = 'center';
+          empty.innerHTML = '<p class="text-muted text-sm">No ' + status + ' trips</p>';
+          container.appendChild(empty);
+          return;
+        }
+
+        groups[status].forEach((t, i) => {
+          const startDate = new Date(t.startDate);
+          const endDate = new Date(t.endDate);
+          const dateStr = `${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+          const mood = moodLabels[t.mood] || t.mood;
+          const img = t.image || '/static/assets/images/placeholder.png';
+
+          const card = document.createElement('div');
+          card.className = `trip-card glass-card glass-card--glow animate-fadeInUp delay-${Math.min(i + 1, 4)}`;
+          card.onclick = () => window.location.href = itineraryViewUrl + '?trip=' + t.id;
+          card.innerHTML = `
+            <img class="trip-card__img" src="${img}" alt="${t.name}" onerror="this.style.display='none'" />
+            <div class="trip-card__info">
+              <div class="trip-card__name">${t.name}</div>
+              <div class="trip-card__meta">
+                <span>📅 ${dateStr}</span>
+                <span>🏙️ ${t.citiesCount || 0} cities</span>
+                <span>💰 $${Number(t.budget).toLocaleString()}</span>
+              </div>
+            </div>
+            <span class="badge badge--${t.mood}">${mood}</span>
+            <div class="trip-card__actions">
+              <button class="btn btn--ghost btn--sm" onclick="event.stopPropagation(); window.location.href='${itineraryViewUrl}?trip=${t.id}'"><i data-lucide="eye" style="width:16px;height:16px;"></i></button>
+              <button class="btn btn--ghost btn--sm" onclick="event.stopPropagation(); window.location.href='${buildItineraryUrl}?trip=${t.id}'"><i data-lucide="pencil" style="width:16px;height:16px;"></i></button>
+              <button class="btn btn--ghost btn--sm" onclick="event.stopPropagation(); deleteTrip(${t.id}, '${t.name.replace(/'/g, "\\'")}')" title="Delete trip"><i data-lucide="trash-2" style="width:16px;height:16px;color:var(--danger);"></i></button>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      });
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    async function deleteTrip(id, name) {
+      if (!confirm(`Delete trip "${name}"? This cannot be undone.`)) return;
+      try {
+        const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+        const res = await fetch(`/api/trips/${id}/`, {
+          method: 'DELETE',
+          headers: { 'X-CSRFToken': csrfToken },
+        });
+        if (!res.ok) throw new Error('Delete failed');
+        allTrips = allTrips.filter(t => t.id !== id);
+        renderTrips(document.getElementById('tripSearch').value);
+        showToast(`Trip "${name}" deleted`, 'success');
+      } catch (e) {
+        console.error('Delete trip error:', e);
+        showToast('Failed to delete trip', 'error');
+      }
+    }
+
+    document.getElementById('tripSearch').addEventListener('input', (e) => {
+      renderTrips(e.target.value);
+    });
+
+    loadTrips();
+  </script>
+</body>
+</html>

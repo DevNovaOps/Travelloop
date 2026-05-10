@@ -1,0 +1,443 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Invoices & Billing — Travelloop</title>
+  <meta name="description" content="Manage trip expenses, invoices, and payments on Travelloop." />
+  <link rel="icon" href="{% static 'assets/images/logo.svg' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/components.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/pages.css' %}" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Razorpay loaded on-demand to avoid ad-blocker tracking errors -->
+  <style>
+    .invoice-card{padding:var(--sp-6);margin-bottom:var(--sp-4);}
+    .invoice-header{display:flex;gap:var(--sp-6);flex-wrap:wrap;margin-bottom:var(--sp-6);}
+    .invoice-header__trip{flex:1;min-width:200px;}
+    .invoice-header__meta{flex:1;min-width:200px;}
+    .invoice-header__budget{flex:0 0 280px;padding:var(--sp-4);border-radius:var(--radius-lg);background:rgba(var(--cyan-rgb,0,200,200),.06);border:1px solid var(--glass-border);}
+    .expense-table{width:100%;border-collapse:collapse;margin:var(--sp-4) 0;}
+    .expense-table th,.expense-table td{padding:var(--sp-2) var(--sp-3);text-align:left;border-bottom:1px solid var(--glass-border);font-size:.85rem;}
+    .expense-table th{color:var(--text-dim);font-weight:600;text-transform:uppercase;font-size:.7rem;letter-spacing:.05em;}
+    .expense-table tbody tr:hover{background:rgba(var(--cyan-rgb,0,200,200),.04);}
+    .totals-row{display:flex;justify-content:flex-end;gap:var(--sp-8);padding:var(--sp-3) var(--sp-4);border-top:2px solid var(--glass-border);}
+    .totals-row span{font-size:.85rem;color:var(--text-dim);}
+    .totals-row strong{font-size:1.1rem;}
+    .invoice-actions{display:flex;gap:var(--sp-3);flex-wrap:wrap;margin-top:var(--sp-4);}
+    .status-badge{padding:2px 10px;border-radius:20px;font-size:.7rem;font-weight:600;text-transform:uppercase;}
+    .status-badge--pending{background:rgba(255,170,0,.15);color:#ffaa00;}
+    .status-badge--paid{background:rgba(0,200,120,.15);color:#00c878;}
+    .status-badge--failed{background:rgba(240,50,50,.15);color:#f03232;}
+    .budget-ring{width:80px;height:80px;border-radius:50%;border:6px solid var(--glass-border);display:flex;align-items:center;justify-content:center;margin:0 auto var(--sp-2);position:relative;}
+    .budget-ring::after{content:'';position:absolute;inset:0;border-radius:50%;border:6px solid var(--cyan);border-bottom-color:transparent;border-left-color:transparent;}
+    .inv-list-item{display:flex;align-items:center;justify-content:space-between;padding:var(--sp-3) var(--sp-4);cursor:pointer;border-bottom:1px solid var(--glass-border);transition:background .15s;}
+    .inv-list-item:hover{background:rgba(var(--cyan-rgb,0,200,200),.04);}
+    .inv-list-item.active{background:rgba(var(--cyan-rgb,0,200,200),.08);border-left:3px solid var(--cyan);}
+  </style>
+</head>
+<body>
+  <div class="page-layout">
+    <aside class="page-sidebar" id="sidebar">
+      <a href="{% url 'index' %}" class="sidebar__brand">
+        <div class="tl-logo tl-logo--sm"><img src="{% static 'assets/images/logo.svg' %}" alt="Travelloop" /></div>
+        <span class="tl-brand-text" style="font-size:1.25rem;"><span class="text-travel">Travel</span><span class="text-loop">l<span class="text-oo">oo</span>p</span></span>
+      </a>
+      <nav class="sidebar__nav">
+        <a href="{% url 'dashboard' %}" class="sidebar__link"><i data-lucide="layout-dashboard" style="width:20px;height:20px;"></i> Overview</a>
+        <a href="{% url 'trips' %}" class="sidebar__link"><i data-lucide="map" style="width:20px;height:20px;"></i> My Trips</a>
+        <a href="{% url 'create_trip' %}" class="sidebar__link"><i data-lucide="plus-circle" style="width:20px;height:20px;"></i> New Trip</a>
+        <a href="{% url 'packing' %}" class="sidebar__link"><i data-lucide="check-square" style="width:20px;height:20px;"></i> Packing</a>
+        <a href="{% url 'notes' %}" class="sidebar__link"><i data-lucide="notebook-pen" style="width:20px;height:20px;"></i> Notes</a>
+        <a href="{% url 'community' %}" class="sidebar__link"><i data-lucide="users" style="width:20px;height:20px;"></i> Community</a>
+        <a href="{% url 'search' %}" class="sidebar__link"><i data-lucide="search" style="width:20px;height:20px;"></i> Explore</a>
+        <a href="{% url 'invoices' %}" class="sidebar__link active"><i data-lucide="receipt" style="width:20px;height:20px;"></i> Invoices</a>
+        <a href="{% url 'profile' %}" class="sidebar__link"><i data-lucide="user" style="width:20px;height:20px;"></i> Profile</a>
+      </nav>
+      <div style="border-top:1px solid var(--glass-border);padding-top:var(--sp-4);margin-top:auto;">
+        <div class="flex items-center gap-3" style="padding:var(--sp-2) var(--sp-3);">
+          <div class="avatar" id="sidebarAvatar">T</div>
+          <div><div class="text-sm font-semi" id="sidebarName">Traveler</div><div class="text-xs text-muted" id="sidebarEmail">user@travelloop.com</div></div>
+          <button class="theme-toggle" id="themeToggle" style="margin-left:auto;width:32px;height:32px;" aria-label="Toggle theme"><i data-lucide="sun" style="width:16px;height:16px;"></i></button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="page-content">
+      <!-- Header -->
+      <div class="section-header">
+        <div>
+          <h1 class="section-header__title">Expense Invoices</h1>
+          <p class="section-header__subtitle">Track expenses and manage payments for your trips</p>
+        </div>
+        <button class="btn btn--primary" id="createInvoiceBtn"><i data-lucide="plus" style="width:18px;height:18px;"></i> New Invoice</button>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="search-toolbar">
+        <i data-lucide="search" style="width:18px;height:18px;color:var(--text-dim);flex-shrink:0;"></i>
+        <input class="search-toolbar__input" type="text" placeholder="Search invoices..." id="invoiceSearch" />
+        <div class="search-toolbar__actions">
+          <select class="form-input" style="max-width:180px;padding:6px 10px;font-size:.8rem;" id="filterStatus">
+            <option value="all">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+            <option value="failed">Failed</option>
+          </select>
+          <button class="toolbar-btn" id="sortBtn"><i data-lucide="arrow-up-down" style="width:14px;height:14px;"></i> Sort</button>
+        </div>
+      </div>
+
+      <!-- Invoice List -->
+      <div class="glass-card p-0 mb-6" id="invoiceList" style="max-height:200px;overflow-y:auto;">
+        <div class="text-muted p-4 text-center">Loading invoices...</div>
+      </div>
+
+      <!-- Invoice Detail -->
+      <div id="invoiceDetail" style="display:none;">
+        <a href="#" class="text-sm text-muted mb-4" style="display:inline-flex;align-items:center;gap:4px;" onclick="backToList(); return false;">
+          <i data-lucide="arrow-left" style="width:14px;height:14px;"></i> Back to My Trips
+        </a>
+        <div class="glass-card glass-card--glow invoice-card animate-fadeInUp" id="invoiceCard">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Create Invoice Modal -->
+      <div class="modal-overlay" id="createModal" style="display:none;">
+        <div class="glass-card glass-card--glow p-6" style="width:560px;max-width:95vw;">
+          <h3 style="margin-bottom:var(--sp-4);">Create Invoice</h3>
+          <div class="form-group">
+            <label class="form-label">Select Trip</label>
+            <select class="form-input" id="modalTripSelect"><option value="">Loading...</option></select>
+          </div>
+          <h4 style="margin:var(--sp-4) 0 var(--sp-2);font-size:.9rem;">Expense Items</h4>
+          <div id="modalItems">
+            <div class="flex gap-2 mb-2 expense-row">
+              <select class="form-input" style="width:110px;font-size:.8rem;" data-field="category">
+                <option value="hotel">Hotel</option><option value="travel">Travel</option><option value="food">Food</option>
+                <option value="activity">Activity</option><option value="transport">Transport</option>
+                <option value="shopping">Shopping</option><option value="other">Other</option>
+              </select>
+              <input class="form-input" type="text" placeholder="Description" style="flex:1;font-size:.8rem;" data-field="description" />
+              <input class="form-input" type="text" placeholder="Qty" style="width:80px;font-size:.8rem;" data-field="quantity" value="1" />
+              <input class="form-input" type="number" placeholder="Unit Cost" style="width:100px;font-size:.8rem;" data-field="unitCost" />
+            </div>
+          </div>
+          <button class="btn btn--ghost btn--sm mt-2" id="addItemRowBtn"><i data-lucide="plus" style="width:14px;height:14px;"></i> Add Row</button>
+          <div class="flex gap-2 mt-4">
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">Tax %</label>
+              <input class="form-input" type="number" id="modalTax" value="5" style="font-size:.85rem;" />
+            </div>
+            <div class="form-group" style="flex:1;">
+              <label class="form-label">Discount</label>
+              <input class="form-input" type="number" id="modalDiscount" value="0" style="font-size:.85rem;" />
+            </div>
+          </div>
+          <div class="flex justify-between items-center mt-4">
+            <button class="btn btn--ghost" onclick="document.getElementById('createModal').style.display='none'">Cancel</button>
+            <button class="btn btn--primary" id="modalCreateBtn"><i data-lucide="check" style="width:16px;height:16px;"></i> Create Invoice</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="{% static 'js/app.js' %}"></script>
+  <script>
+    let invoices = [], currentInv = null, sortMode = 'newest';
+    const csrf = () => document.cookie.match(/csrftoken=([^;]+)/)?.[1]||'';
+
+    // User info
+    (async()=>{try{const r=await fetch('/api/profile/');if(r.ok){const u=await r.json();const n=`${u.firstName||''} ${u.lastName||''}`.trim()||'Traveler';document.getElementById('sidebarName').textContent=n;document.getElementById('sidebarAvatar').textContent=n.charAt(0).toUpperCase();document.getElementById('sidebarEmail').textContent=u.email||'';}}catch(e){}})();
+
+    // ── Load invoices ──
+    async function loadInvoices() {
+      try {
+        const r = await fetch('/api/invoices/');
+        if (!r.ok) throw new Error();
+        const d = await r.json();
+        invoices = d.invoices || [];
+        renderInvoiceList();
+      } catch(e) { console.error(e); }
+    }
+
+    function renderInvoiceList() {
+      const el = document.getElementById('invoiceList');
+      const search = document.getElementById('invoiceSearch').value.toLowerCase();
+      const status = document.getElementById('filterStatus').value;
+      let filtered = invoices.filter(inv => {
+        if (search && !inv.invoiceNumber.toLowerCase().includes(search) && !inv.tripName.toLowerCase().includes(search)) return false;
+        if (status !== 'all' && inv.paymentStatus !== status) return false;
+        return true;
+      });
+      if (sortMode === 'amount') filtered.sort((a,b) => b.grandTotal - a.grandTotal);
+      if (filtered.length === 0) {
+        el.innerHTML = '<div class="text-muted p-4 text-center">No invoices found. Create one to get started!</div>';
+        return;
+      }
+      el.innerHTML = filtered.map(inv => `
+        <div class="inv-list-item ${currentInv?.id===inv.id?'active':''}" onclick="viewInvoice(${inv.id})">
+          <div>
+            <strong style="font-size:.85rem;">${inv.invoiceNumber}</strong>
+            <span class="text-muted text-xs" style="margin-left:8px;">${inv.tripName}</span>
+          </div>
+          <div class="flex items-center gap-3">
+            <span style="font-weight:600;font-size:.9rem;">${inv.currency} ${inv.grandTotal.toFixed(2)}</span>
+            <span class="status-badge status-badge--${inv.paymentStatus}">${inv.paymentStatus}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function viewInvoice(id) {
+      currentInv = invoices.find(i => i.id === id);
+      if (!currentInv) return;
+      renderInvoiceList();
+      document.getElementById('invoiceDetail').style.display = 'block';
+      const card = document.getElementById('invoiceCard');
+      const items = currentInv.items || [];
+      const sym = currentInv.currency || '$';
+      const budget = parseFloat(currentInv.grandTotal) || 0;
+      const tripBudget = 0; // Would come from trip data
+      card.innerHTML = `
+        <div class="invoice-header">
+          <div class="invoice-header__trip">
+            <h2 style="font-size:1.2rem;margin-bottom:4px;">${currentInv.tripName}</h2>
+            <p class="text-sm text-muted">${currentInv.startDate} — ${currentInv.endDate}</p>
+            <p class="text-sm text-muted">Destination: ${currentInv.destination}</p>
+          </div>
+          <div class="invoice-header__meta">
+            <p class="text-sm"><strong>Invoice ID:</strong> ${currentInv.invoiceNumber}</p>
+            <p class="text-sm"><strong>Generated:</strong> ${new Date(currentInv.createdAt).toLocaleDateString()}</p>
+            <p class="text-sm"><strong>Status:</strong> <span class="status-badge status-badge--${currentInv.paymentStatus}">${currentInv.paymentStatus}</span></p>
+          </div>
+          <div class="invoice-header__budget">
+            <div class="budget-ring"><span style="font-size:.7rem;font-weight:600;">💰</span></div>
+            <p class="text-sm text-center"><strong>Total Spent:</strong> ${sym} ${budget.toFixed(2)}</p>
+          </div>
+        </div>
+
+        <table class="expense-table">
+          <thead><tr><th>#</th><th>Category</th><th>Description</th><th>Qty/Details</th><th>Unit Cost</th><th>Amount</th><th></th></tr></thead>
+          <tbody>
+            ${items.map((it,i) => `
+              <tr>
+                <td>${i+1}</td><td style="text-transform:capitalize;">${it.category}</td>
+                <td>${it.description}</td><td>${it.quantity}</td>
+                <td>${sym} ${it.unitCost.toFixed(2)}</td><td><strong>${sym} ${it.amount.toFixed(2)}</strong></td>
+                <td><button class="btn btn--ghost btn--sm" onclick="deleteExpenseItem(${currentInv.id},${it.id})" title="Remove"><i data-lucide="trash-2" style="width:12px;height:12px;color:var(--danger);"></i></button></td>
+              </tr>
+            `).join('')}
+            ${items.length===0?'<tr><td colspan="7" class="text-muted text-center">No expenses yet</td></tr>':''}
+          </tbody>
+        </table>
+
+        <div class="totals-row">
+          <div><span>Subtotal</span><br><strong>${sym} ${currentInv.subtotal.toFixed(2)}</strong></div>
+          <div><span>Tax (${currentInv.taxPercent}%)</span><br><strong>${sym} ${currentInv.taxAmount.toFixed(2)}</strong></div>
+          <div><span>Discount</span><br><strong>${sym} ${currentInv.discount.toFixed(2)}</strong></div>
+          <div style="border-left:2px solid var(--cyan);padding-left:var(--sp-4);"><span>Grand Total</span><br><strong style="font-size:1.3rem;color:var(--cyan);">${sym} ${currentInv.grandTotal.toFixed(2)}</strong></div>
+        </div>
+
+        <div class="invoice-actions">
+          <button class="btn btn--secondary btn--sm" onclick="addExpenseItemPrompt()"><i data-lucide="plus" style="width:14px;height:14px;"></i> Add Expense</button>
+          ${currentInv.paymentStatus !== 'paid' ? `
+            <button class="btn btn--primary btn--sm" onclick="payWithRazorpay(${currentInv.id})"><i data-lucide="credit-card" style="width:14px;height:14px;"></i> Pay with Razorpay</button>
+            <button class="btn btn--primary btn--sm" style="background:linear-gradient(135deg,#635bff,#4f46e5);" onclick="payWithStripe(${currentInv.id})"><i data-lucide="credit-card" style="width:14px;height:14px;"></i> Pay with Stripe</button>
+            <button class="btn btn--ghost btn--sm" onclick="markAsPaid(${currentInv.id})"><i data-lucide="check-circle" style="width:14px;height:14px;"></i> Mark as Paid</button>
+          ` : '<span class="status-badge status-badge--paid" style="font-size:.85rem;padding:6px 16px;">✓ Paid</span>'}
+          <button class="btn btn--ghost btn--sm" style="margin-left:auto;color:var(--danger);" onclick="deleteInvoice(${currentInv.id})"><i data-lucide="trash-2" style="width:14px;height:14px;"></i> Delete</button>
+        </div>
+      `;
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function backToList() {
+      currentInv = null;
+      document.getElementById('invoiceDetail').style.display = 'none';
+      renderInvoiceList();
+    }
+
+    // ── Create Invoice ──
+    document.getElementById('createInvoiceBtn').addEventListener('click', async () => {
+      document.getElementById('createModal').style.display = 'flex';
+      try {
+        const r = await fetch('/api/trips/');
+        if (r.ok) {
+          const d = await r.json();
+          const sel = document.getElementById('modalTripSelect');
+          sel.innerHTML = (d.trips||[]).map(t => `<option value="${t.id}">${t.name} (${t.destination})</option>`).join('');
+        }
+      } catch(e){}
+    });
+
+    document.getElementById('addItemRowBtn').addEventListener('click', () => {
+      const container = document.getElementById('modalItems');
+      const row = document.createElement('div');
+      row.className = 'flex gap-2 mb-2 expense-row';
+      row.innerHTML = `
+        <select class="form-input" style="width:110px;font-size:.8rem;" data-field="category">
+          <option value="hotel">Hotel</option><option value="travel">Travel</option><option value="food">Food</option>
+          <option value="activity">Activity</option><option value="transport">Transport</option>
+          <option value="shopping">Shopping</option><option value="other">Other</option>
+        </select>
+        <input class="form-input" type="text" placeholder="Description" style="flex:1;font-size:.8rem;" data-field="description" />
+        <input class="form-input" type="text" placeholder="Qty" style="width:80px;font-size:.8rem;" data-field="quantity" value="1" />
+        <input class="form-input" type="number" placeholder="Unit Cost" style="width:100px;font-size:.8rem;" data-field="unitCost" />
+      `;
+      container.appendChild(row);
+    });
+
+    document.getElementById('modalCreateBtn').addEventListener('click', async () => {
+      const tripId = document.getElementById('modalTripSelect').value;
+      if (!tripId) { showToast('Select a trip','error'); return; }
+      const rows = document.querySelectorAll('#modalItems .expense-row');
+      const items = [];
+      rows.forEach(row => {
+        const desc = row.querySelector('[data-field="description"]').value.trim();
+        if (!desc) return;
+        items.push({
+          category: row.querySelector('[data-field="category"]').value,
+          description: desc,
+          quantity: row.querySelector('[data-field="quantity"]').value || '1',
+          unitCost: parseFloat(row.querySelector('[data-field="unitCost"]').value) || 0,
+        });
+      });
+      if (items.length === 0) { showToast('Add at least one expense item','error'); return; }
+      try {
+        const r = await fetch('/api/invoices/', {
+          method: 'POST', headers: {'Content-Type':'application/json','X-CSRFToken':csrf()},
+          body: JSON.stringify({ tripId: parseInt(tripId), items, taxPercent: parseFloat(document.getElementById('modalTax').value)||5, discount: parseFloat(document.getElementById('modalDiscount').value)||0 }),
+        });
+        if (r.ok) {
+          document.getElementById('createModal').style.display = 'none';
+          showToast('Invoice created! 🧾','success');
+          loadInvoices();
+        }
+      } catch(e) { showToast('Failed to create invoice','error'); }
+    });
+
+    // ── Actions ──
+    async function markAsPaid(id) {
+      await fetch(`/api/invoices/${id}/`, { method:'PUT', headers:{'Content-Type':'application/json','X-CSRFToken':csrf()}, body:JSON.stringify({paymentStatus:'paid'}) });
+      showToast('Marked as paid ✓','success');
+      loadInvoices();
+      setTimeout(() => viewInvoice(id), 300);
+    }
+
+    async function deleteInvoice(id) {
+      await fetch(`/api/invoices/${id}/`, { method:'DELETE', headers:{'X-CSRFToken':csrf()} });
+      showToast('Invoice deleted','info');
+      backToList();
+      loadInvoices();
+    }
+
+    async function deleteExpenseItem(invId, itemId) {
+      await fetch(`/api/invoices/${invId}/items/${itemId}/`, { method:'DELETE', headers:{'X-CSRFToken':csrf()} });
+      showToast('Expense removed','info');
+      loadInvoices();
+      setTimeout(() => viewInvoice(invId), 300);
+    }
+
+    function addExpenseItemPrompt() {
+      // Reuse the modal with a single row
+      document.getElementById('createModal').style.display = 'flex';
+      document.getElementById('modalTripSelect').value = currentInv?.tripId || '';
+    }
+
+    // ── Razorpay Payment (lazy-loaded) ──
+    function loadRazorpaySDK() {
+      return new Promise((resolve, reject) => {
+        if (typeof Razorpay !== 'undefined') { resolve(); return; }
+        const s = document.createElement('script');
+        s.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        s.onload = resolve;
+        s.onerror = () => reject(new Error('Failed to load Razorpay SDK'));
+        document.head.appendChild(s);
+      });
+    }
+
+    async function payWithRazorpay(invId) {
+      try {
+        showToast('Loading payment gateway...','info');
+        await loadRazorpaySDK();
+        const r = await fetch('/api/payment/create/', {
+          method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':csrf()},
+          body: JSON.stringify({ invoiceId: invId, method: 'razorpay' }),
+        });
+        const d = await r.json();
+        if (!d.success) { showToast('Payment failed','error'); return; }
+        const options = {
+          key: d.key, amount: d.amount, currency: d.currency,
+          name: 'Travelloop', description: `Invoice ${d.invoiceNumber}`,
+          order_id: d.orderId,
+          handler: async function(response) {
+            const vr = await fetch('/api/payment/verify/', {
+              method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':csrf()},
+              body: JSON.stringify({
+                invoiceId: invId, method: 'razorpay',
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            });
+            if ((await vr.json()).success) {
+              showToast('Payment successful! ✓','success');
+              loadInvoices();
+              setTimeout(() => viewInvoice(invId), 500);
+            }
+          },
+          theme: { color: '#00e5c7' },
+        };
+        new Razorpay(options).open();
+      } catch(e) { showToast('Razorpay error: '+e.message,'error'); }
+    }
+
+    // ── Stripe Payment ──
+    async function payWithStripe(invId) {
+      try {
+        const r = await fetch('/api/payment/create/', {
+          method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':csrf()},
+          body: JSON.stringify({ invoiceId: invId, method: 'stripe' }),
+        });
+        const d = await r.json();
+        if (d.success && d.url) {
+          window.location.href = d.url; // Redirect to Stripe checkout
+        } else { showToast(d.error || 'Stripe payment failed','error'); }
+      } catch(e) { showToast('Stripe error: '+e.message,'error'); }
+    }
+
+    // ── Check for Stripe return ──
+    (function checkStripeReturn() {
+      const params = new URLSearchParams(window.location.search);
+      const paidId = params.get('paid');
+      if (paidId) {
+        fetch('/api/payment/verify/', {
+          method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':csrf()},
+          body: JSON.stringify({ invoiceId: parseInt(paidId), method: 'stripe' }),
+        }).then(() => {
+          showToast('Stripe payment successful! ✓','success');
+          loadInvoices();
+          setTimeout(() => viewInvoice(parseInt(paidId)), 500);
+        });
+        window.history.replaceState({}, '', '/invoices/');
+      }
+    })();
+
+    // ── Toolbar ──
+    document.getElementById('invoiceSearch').addEventListener('input', renderInvoiceList);
+    document.getElementById('filterStatus').addEventListener('change', renderInvoiceList);
+    document.getElementById('sortBtn').addEventListener('click', () => {
+      sortMode = sortMode === 'newest' ? 'amount' : 'newest';
+      renderInvoiceList();
+      showToast(`Sorted by ${sortMode}`, 'info');
+    });
+
+    loadInvoices();
+  </script>
+</body>
+</html>

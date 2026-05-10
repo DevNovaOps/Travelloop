@@ -1,0 +1,297 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Build Itinerary — Travelloop</title>
+  <meta name="description" content="Build your trip itinerary section by section with dates, budgets, and activities." />
+  <link rel="icon" href="{% static 'assets/images/logo.svg' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/components.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/pages.css' %}" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="page-layout">
+    <aside class="page-sidebar" id="sidebar">
+      <a href="{% url 'index' %}" class="sidebar__brand">
+        <div class="tl-logo tl-logo--sm"><img src="{% static 'assets/images/logo.svg' %}" alt="Travelloop" /></div>
+        <span class="tl-brand-text" style="font-size:1.25rem;"><span class="text-travel">Travel</span><span class="text-loop">l<span class="text-oo">oo</span>p</span></span>
+      </a>
+      <nav class="sidebar__nav">
+        <a href="{% url 'dashboard' %}" class="sidebar__link"><i data-lucide="layout-dashboard" style="width:20px;height:20px;"></i> Overview</a>
+        <a href="{% url 'trips' %}" class="sidebar__link"><i data-lucide="map" style="width:20px;height:20px;"></i> My Trips</a>
+        <a href="{% url 'create_trip' %}" class="sidebar__link active"><i data-lucide="plus-circle" style="width:20px;height:20px;"></i> New Trip</a>
+        <a href="{% url 'packing' %}" class="sidebar__link"><i data-lucide="check-square" style="width:20px;height:20px;"></i> Packing</a>
+        <a href="{% url 'notes' %}" class="sidebar__link"><i data-lucide="notebook-pen" style="width:20px;height:20px;"></i> Notes</a>
+        <a href="{% url 'community' %}" class="sidebar__link"><i data-lucide="users" style="width:20px;height:20px;"></i> Community</a>
+        <a href="{% url 'search' %}" class="sidebar__link"><i data-lucide="search" style="width:20px;height:20px;"></i> Explore</a>
+        <a href="{% url 'invoices' %}" class="sidebar__link"><i data-lucide="receipt" style="width:20px;height:20px;"></i> Invoices</a>
+        <a href="{% url 'profile' %}" class="sidebar__link"><i data-lucide="user" style="width:20px;height:20px;"></i> Profile</a>
+      </nav>
+      <div style="border-top:1px solid var(--glass-border);padding-top:var(--sp-4);margin-top:auto;">
+        <div class="flex items-center gap-3" style="padding:var(--sp-2) var(--sp-3);">
+          <div class="avatar" id="sidebarAvatar">T</div>
+          <div><div class="text-sm font-semi" id="sidebarName">Traveler</div><div class="text-xs text-muted">user@travelloop.com</div></div>
+          <button class="theme-toggle" id="themeToggle" style="margin-left:auto;width:32px;height:32px;" aria-label="Toggle theme"><i data-lucide="sun" style="width:16px;height:16px;"></i></button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="page-content">
+      <div class="section-header">
+        <div>
+          <h1 class="section-header__title">Build Itinerary</h1>
+          <p class="section-header__subtitle">Add sections for each part of your journey — hotels, activities, transport, and more</p>
+        </div>
+        <button class="btn btn--primary" id="saveItineraryBtn">
+          <i data-lucide="save" style="width:18px;height:18px;"></i> Save Itinerary
+        </button>
+      </div>
+
+      <!-- Itinerary Sections Container -->
+      <div id="sectionsContainer">
+        <!-- Loaded from backend -->
+      </div>
+
+      <!-- Add Section Button -->
+      <button class="add-section-btn" id="addSectionBtn">
+        <i data-lucide="plus-circle" style="width:20px;height:20px;"></i> Add Another Section
+      </button>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="{% static 'js/app.js' %}"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const tripId = params.get('trip');
+    let sectionCount = 0;
+    let tripData = null;
+
+    // ── User info from API ──
+    (async () => {
+      try {
+        const res = await fetch('/api/profile/');
+        if (res.ok) {
+          const u = await res.json();
+          const name = `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Traveler';
+          const sn = document.getElementById('sidebarName');
+          if (sn) sn.textContent = name;
+          const sa = document.getElementById('sidebarAvatar');
+          if (sa) sa.textContent = name.charAt(0).toUpperCase();
+        }
+      } catch (e) {}
+    })();
+
+    // ── Load trip data from backend ──
+    async function loadTrip() {
+      if (!tripId) {
+        showToast('No trip selected. Redirecting...', 'error');
+        setTimeout(() => window.location.href = "{% url 'create_trip' %}", 1500);
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/trips/${tripId}/`);
+        if (!res.ok) throw new Error('Trip not found');
+        tripData = await res.json();
+
+        // Update page header
+        document.querySelector('.section-header__title').textContent = `Build Itinerary — ${tripData.name}`;
+        document.querySelector('.section-header__subtitle').textContent =
+          `${tripData.destination} · ${tripData.startDate} to ${tripData.endDate} · ${tripData.mood}`;
+
+        // Load existing sections or create empty one
+        const sections = tripData.sections || [];
+        if (sections.length > 0) {
+          sections.forEach(s => addSectionCard(s));
+        } else {
+          addSectionCard(null);
+        }
+      } catch (e) {
+        console.error('Load trip error:', e);
+        showToast('Could not load trip data', 'error');
+        addSectionCard(null);
+      }
+    }
+
+    function addSectionCard(data) {
+      sectionCount++;
+      const container = document.getElementById('sectionsContainer');
+      const section = document.createElement('div');
+      section.className = 'itinerary-section glass-card glass-card--glow animate-scaleIn';
+      section.dataset.sectionId = data?.id || '';
+
+      const title = data?.title || '';
+      const desc = data?.description || '';
+      const startDate = data?.startDate || tripData?.startDate || '';
+      const endDate = data?.endDate || tripData?.endDate || '';
+      const budget = data?.budget ? `$${data.budget}` : '';
+
+      section.innerHTML = `
+        <div class="itinerary-section__header">
+          <span class="itinerary-section__num">Section ${sectionCount}</span>
+          <button class="btn btn--ghost btn--sm" title="Remove section" onclick="removeSection(this)"><i data-lucide="trash-2" style="width:16px;height:16px;color:var(--danger);"></i></button>
+        </div>
+        <div class="form-group mb-4">
+          <label class="form-label">Section Title</label>
+          <input class="form-input section-title" type="text" placeholder="e.g. Arrival & Hotel Check-in" value="${title}" />
+        </div>
+        <div class="form-group mb-4">
+          <label class="form-label">Description</label>
+          <textarea class="form-input section-desc" rows="2" placeholder="All the necessary information about this section.">${desc}</textarea>
+        </div>
+        <div class="grid grid-2 gap-4 mt-4">
+          <div class="form-group">
+            <label class="form-label">Date Range</label>
+            <div class="flex gap-2">
+              <input class="form-input section-start" type="date" value="${startDate}" style="flex:1;" />
+              <input class="form-input section-end" type="date" value="${endDate}" style="flex:1;" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Budget for this section</label>
+            <input class="form-input section-budget" type="text" placeholder="$0.00" value="${budget}" />
+          </div>
+        </div>
+      `;
+      container.appendChild(section);
+
+      // ── Apply date constraints: section dates must be within trip date range ──
+      const sStart = section.querySelector('.section-start');
+      const sEnd = section.querySelector('.section-end');
+      if (tripData) {
+        if (tripData.startDate) {
+          sStart.setAttribute('min', tripData.startDate);
+          sEnd.setAttribute('min', tripData.startDate);
+        }
+        if (tripData.endDate) {
+          sStart.setAttribute('max', tripData.endDate);
+          sEnd.setAttribute('max', tripData.endDate);
+        }
+      }
+
+      // Section end date must be >= section start date
+      sStart.addEventListener('change', () => {
+        if (sStart.value) {
+          // End date min = max of (trip start, section start)
+          const minEnd = sStart.value > (tripData?.startDate || '') ? sStart.value : (tripData?.startDate || sStart.value);
+          sEnd.setAttribute('min', minEnd);
+          if (sEnd.value && sEnd.value < sStart.value) {
+            sEnd.value = '';
+            showToast('Section end date reset — it cannot be before the start date.', 'info');
+          }
+        }
+      });
+
+      sEnd.addEventListener('change', () => {
+        if (sEnd.value && sStart.value && sEnd.value < sStart.value) {
+          sEnd.value = '';
+          showToast('Section end date cannot be before its start date.', 'error');
+        }
+      });
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    function removeSection(btn) {
+      const section = btn.closest('.itinerary-section');
+      const id = section.dataset.sectionId;
+      if (id && tripId) {
+        const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+        fetch(`/api/trips/${tripId}/sections/${id}/`, {
+          method: 'DELETE',
+          headers: { 'X-CSRFToken': csrfToken },
+        }).catch(e => console.warn('Delete section error:', e));
+      }
+      section.remove();
+      renumberSections();
+    }
+
+    function renumberSections() {
+      document.querySelectorAll('.itinerary-section').forEach((s, i) => {
+        s.querySelector('.itinerary-section__num').textContent = `Section ${i + 1}`;
+      });
+      sectionCount = document.querySelectorAll('.itinerary-section').length;
+    }
+
+    document.getElementById('addSectionBtn').addEventListener('click', () => {
+      addSectionCard(null);
+      const sections = document.querySelectorAll('.itinerary-section');
+      sections[sections.length - 1].scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    // ── Save all sections to backend ──
+    document.getElementById('saveItineraryBtn').addEventListener('click', async () => {
+      if (!tripId) {
+        showToast('No trip to save to', 'error');
+        return;
+      }
+
+      const sections = document.querySelectorAll('.itinerary-section');
+      const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+      let totalBudget = 0;
+      let savedCount = 0;
+
+      for (const section of sections) {
+        const existingId = section.dataset.sectionId;
+        const title = section.querySelector('.section-title').value.trim();
+        const desc = section.querySelector('.section-desc').value.trim();
+        const startDate = section.querySelector('.section-start').value;
+        const endDate = section.querySelector('.section-end').value;
+        const budgetStr = section.querySelector('.section-budget').value.replace(/[^0-9.]/g, '');
+        const budget = parseFloat(budgetStr) || 0;
+        totalBudget += budget;
+
+        if (!title) continue;
+
+        const payload = { title, description: desc, startDate: startDate || null, endDate: endDate || null, budget };
+
+        try {
+          if (existingId) {
+            // Update existing section
+            await fetch(`/api/trips/${tripId}/sections/${existingId}/`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+              body: JSON.stringify(payload),
+            });
+          } else {
+            // Create new section
+            const res = await fetch(`/api/trips/${tripId}/sections/`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+              body: JSON.stringify(payload),
+            });
+            if (res.ok) {
+              const result = await res.json();
+              section.dataset.sectionId = result.sectionId;
+            }
+          }
+          savedCount++;
+        } catch (e) {
+          console.error('Save section error:', e);
+        }
+      }
+
+      // Update trip budget
+      if (totalBudget > 0) {
+        try {
+          await fetch(`/api/trips/${tripId}/`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+            body: JSON.stringify({ budget: totalBudget }),
+          });
+        } catch (e) {}
+      }
+
+      showToast(`Itinerary saved! ${savedCount} sections saved 🎉`, 'success');
+      setTimeout(() => window.location.href = "{% url 'itinerary_view' %}?trip=" + tripId, 1200);
+    });
+
+    // Boot
+    loadTrip();
+  </script>
+</body>
+</html>

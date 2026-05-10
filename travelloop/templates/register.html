@@ -1,0 +1,162 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account — Travelloop</title>
+  <meta name="description" content="Join Travelloop and start planning your dream trips with AI-powered tools." />
+  <link rel="icon" href="{% static 'assets/images/logo.svg' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/components.css' %}" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* Register page sizing fixes */
+    .register-card {
+      max-width: 480px;
+      width: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+    .register-card .auth-form {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .register-card .grid {
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .register-card .form-input,
+    .register-card select.form-input {
+      width: 100%;
+      box-sizing: border-box;
+      min-width: 0;
+    }
+    .register-card .form-group {
+      min-width: 0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-blobs">
+    <div class="blob blob--1"></div>
+    <div class="blob blob--2"></div>
+    <div class="blob blob--3"></div>
+  </div>
+  <canvas class="stars-canvas" id="starsCanvas"></canvas>
+
+  <div class="auth-page">
+    <div class="auth-card glass-card glass-card--glow animate-scaleIn register-card">
+      <div class="auth-card__header">
+        <a href="{% url 'index' %}" style="display:flex;flex-direction:column;align-items:center;gap:var(--sp-3);text-decoration:none;margin-bottom:var(--sp-4);">
+          <div class="tl-logo tl-logo--xl">
+            <img src="{% static 'assets/images/logo.svg' %}" alt="Travelloop" />
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+            <span class="tl-brand-text" style="font-size:1.75rem;"><span class="text-travel">Travel</span><span class="text-loop">l<span class="text-oo">oo</span>p</span></span>
+            <span class="tl-brand-subtitle">PLAN &bull; EXPLORE &bull; EXPERIENCE</span>
+          </div>
+        </a>
+        <h2>Create Account</h2>
+        <p>Join the world's smartest travel planner</p>
+      </div>
+
+      <form class="auth-form" id="registerForm" onsubmit="return handleRegister(event)">
+        <div class="grid grid-2 gap-4">
+          <div class="form-group">
+            <label class="form-label" for="reg-fname">First Name</label>
+            <input class="form-input" type="text" id="reg-fname" placeholder="John" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-lname">Last Name</label>
+            <input class="form-input" type="text" id="reg-lname" placeholder="Doe" required />
+          </div>
+        </div>
+
+        <div class="grid grid-2 gap-4">
+          <div class="form-group">
+            <label class="form-label" for="reg-email">Email Address</label>
+            <input class="form-input" type="email" id="reg-email" placeholder="traveler@email.com" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-phone">Phone Number</label>
+            <input class="form-input" type="tel" id="reg-phone" placeholder="+1 234 567 890" />
+          </div>
+        </div>
+
+        <div class="grid grid-2 gap-4">
+          <div class="form-group">
+            <label class="form-label" for="reg-city">City</label>
+            <input class="form-input" type="text" id="reg-city" placeholder="New York" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-country">Country</label>
+            <select class="form-input" id="reg-country">
+              <option value="">Select Country</option>
+              <option value="US">United States</option>
+              <option value="UK">United Kingdom</option>
+              <option value="IN">India</option>
+              <option value="JP">Japan</option>
+              <option value="DE">Germany</option>
+              <option value="FR">France</option>
+              <option value="AU">Australia</option>
+              <option value="BR">Brazil</option>
+              <option value="CA">Canada</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reg-password">Password</label>
+          <input class="form-input" type="password" id="reg-password" placeholder="Min. 8 characters" required minlength="8" />
+        </div>
+
+        <button type="submit" class="btn btn--primary btn--lg" style="width:100%;">
+          <i data-lucide="user-plus" style="width:20px;height:20px;"></i>
+          Register
+        </button>
+
+        <div class="auth-form__footer">
+          Already have an account? <a href="{% url 'login' %}">Sign in</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="{% static 'js/app.js' %}"></script>
+  <script>
+    async function handleRegister(e) {
+      e.preventDefault();
+      const payload = {
+        firstName: document.getElementById('reg-fname').value,
+        lastName: document.getElementById('reg-lname').value,
+        email: document.getElementById('reg-email').value,
+        password: document.getElementById('reg-password').value,
+        phone: document.getElementById('reg-phone').value,
+        city: document.getElementById('reg-city').value,
+        country: document.getElementById('reg-country').value,
+      };
+      try {
+        const res = await fetch('/api/register/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          localStorage.setItem('traveloop_user', JSON.stringify(data.user));
+          showToast('Account created! Welcome aboard!', 'success');
+          setTimeout(() => window.location.href = "{% url 'dashboard' %}", 1200);
+        } else {
+          showToast(data.error || 'Registration failed', 'error');
+        }
+      } catch (err) {
+        showToast('Network error. Please try again.', 'error');
+      }
+      return false;
+    }
+  </script>
+</body>
+</html>

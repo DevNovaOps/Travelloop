@@ -1,0 +1,146 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Explore — Travelloop</title>
+  <meta name="description" content="Search and discover activities, cities, and destinations on Travelloop." />
+  <link rel="icon" href="{% static 'assets/images/logo.svg' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/components.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/pages.css' %}" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="page-layout">
+    <aside class="page-sidebar" id="sidebar">
+      <a href="{% url 'index' %}" class="sidebar__brand">
+        <div class="tl-logo tl-logo--sm"><img src="{% static 'assets/images/logo.svg' %}" alt="Travelloop" /></div>
+        <span class="tl-brand-text" style="font-size:1.25rem;"><span class="text-travel">Travel</span><span class="text-loop">l<span class="text-oo">oo</span>p</span></span>
+      </a>
+      <nav class="sidebar__nav">
+        <a href="{% url 'dashboard' %}" class="sidebar__link"><i data-lucide="layout-dashboard" style="width:20px;height:20px;"></i> Overview</a>
+        <a href="{% url 'trips' %}" class="sidebar__link"><i data-lucide="map" style="width:20px;height:20px;"></i> My Trips</a>
+        <a href="{% url 'create_trip' %}" class="sidebar__link"><i data-lucide="plus-circle" style="width:20px;height:20px;"></i> New Trip</a>
+        <a href="{% url 'packing' %}" class="sidebar__link"><i data-lucide="check-square" style="width:20px;height:20px;"></i> Packing</a>
+        <a href="{% url 'notes' %}" class="sidebar__link"><i data-lucide="notebook-pen" style="width:20px;height:20px;"></i> Notes</a>
+        <a href="{% url 'community' %}" class="sidebar__link"><i data-lucide="users" style="width:20px;height:20px;"></i> Community</a>
+        <a href="{% url 'search' %}" class="sidebar__link active"><i data-lucide="search" style="width:20px;height:20px;"></i> Explore</a>
+        <a href="{% url 'invoices' %}" class="sidebar__link"><i data-lucide="receipt" style="width:20px;height:20px;"></i> Invoices</a>
+        <a href="{% url 'profile' %}" class="sidebar__link"><i data-lucide="user" style="width:20px;height:20px;"></i> Profile</a>
+      </nav>
+      <div style="border-top:1px solid var(--glass-border);padding-top:var(--sp-4);margin-top:auto;">
+        <div class="flex items-center gap-3" style="padding:var(--sp-2) var(--sp-3);">
+          <div class="avatar" id="sidebarAvatar">T</div>
+          <div><div class="text-sm font-semi" id="sidebarName">Traveler</div><div class="text-xs text-muted">user@travelloop.com</div></div>
+          <button class="theme-toggle" id="themeToggle" style="margin-left:auto;width:32px;height:32px;" aria-label="Toggle theme"><i data-lucide="sun" style="width:16px;height:16px;"></i></button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="page-content">
+      <div class="section-header">
+        <div>
+          <h1 class="section-header__title">Explore</h1>
+          <p class="section-header__subtitle">Discover cities, activities, and hidden gems worldwide</p>
+        </div>
+      </div>
+
+      <div class="search-toolbar" style="margin-bottom:var(--sp-3);">
+        <i data-lucide="search" style="width:18px;height:18px;color:var(--text-dim);flex-shrink:0;"></i>
+        <input class="search-toolbar__input" type="text" placeholder="Search cities, activities, places..." id="searchInput" />
+      </div>
+
+      <div class="flex gap-2 mb-6 flex-wrap">
+        <button class="toolbar-btn active" data-cat="all">All</button>
+        <button class="toolbar-btn" data-cat="city">🏙️ Cities</button>
+        <button class="toolbar-btn" data-cat="activity">🎯 Activities</button>
+        <button class="toolbar-btn" data-cat="nature">🌿 Nature</button>
+        <button class="toolbar-btn" data-cat="food">🍽️ Food & Dining</button>
+        <button class="toolbar-btn" data-cat="culture">🏛️ Culture</button>
+      </div>
+
+      <p class="text-sm text-muted mb-4" id="resultCount">Loading...</p>
+      <div id="searchResults"></div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="{% static 'js/app.js' %}"></script>
+  <script>
+    let allResults = [];
+
+    // User info
+    (async()=>{try{const r=await fetch('/api/profile/');if(r.ok){const u=await r.json();const n=`${u.firstName||''} ${u.lastName||''}`.trim()||'Traveler';document.getElementById('sidebarName').textContent=n;document.getElementById('sidebarAvatar').textContent=n.charAt(0).toUpperCase();}}catch(e){}})();
+
+    // Load destinations from backend
+    async function loadDestinations(q='', cat='all') {
+      try {
+        let url = `/api/destinations/?q=${encodeURIComponent(q)}`;
+        if (cat && cat !== 'all') url += `&category=${cat}`;
+        const r = await fetch(url);
+        if (!r.ok) throw new Error();
+        const d = await r.json();
+        allResults = (d.destinations||[]).map(dest => ({
+          id: dest.id, name: dest.name, desc: dest.description,
+          img: dest.image || `https://source.unsplash.com/400x300/?${encodeURIComponent(dest.name)}`,
+          cat: dest.category||'city', rating: dest.rating||0,
+          tags: (dest.tags||'').split(',').filter(Boolean).map(t => t.trim()),
+        }));
+        renderResults();
+      } catch(e) { console.error('Load destinations error:', e); renderResults(); }
+    }
+
+    function renderResults() {
+      const container = document.getElementById('searchResults');
+      container.innerHTML = '';
+      document.getElementById('resultCount').textContent = `Showing ${allResults.length} results`;
+
+      if (allResults.length === 0) {
+        container.innerHTML = '<div class="glass-card p-6" style="text-align:center;"><p class="text-muted">No destinations found. Try a different search.</p></div>';
+        return;
+      }
+
+      allResults.forEach((r, i) => {
+        const card = document.createElement('div');
+        card.className = `search-result glass-card glass-card--glow animate-fadeInUp delay-${Math.min((i%4)+1,4)}`;
+        card.innerHTML = `
+          <img class="search-result__img" src="${r.img}" alt="${r.name}" loading="lazy" onerror="this.style.display='none'" />
+          <div class="search-result__info">
+            <div class="search-result__name">${r.name}</div>
+            <div class="search-result__desc">${r.desc}</div>
+            <div class="search-result__meta">
+              <span class="text-xs">⭐ ${Number(r.rating).toFixed(1)}</span>
+              ${r.tags.map(t => `<span class="badge badge--cyan" style="font-size:0.65rem;">${t}</span>`).join('')}
+            </div>
+          </div>
+          <button class="btn btn--secondary btn--sm" onclick="showToast('Added to trip!','success')">
+            <i data-lucide="plus" style="width:14px;height:14px;"></i> Add
+          </button>`;
+        container.appendChild(card);
+      });
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    let searchTimeout;
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => {
+        const cat = document.querySelector('.toolbar-btn.active[data-cat]')?.dataset.cat || 'all';
+        loadDestinations(e.target.value, cat);
+      }, 300);
+    });
+
+    document.querySelectorAll('.toolbar-btn[data-cat]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.toolbar-btn[data-cat]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        loadDestinations(document.getElementById('searchInput').value, btn.dataset.cat);
+      });
+    });
+
+    loadDestinations();
+  </script>
+</body>
+</html>

@@ -1,0 +1,478 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Trip — Travelloop</title>
+  <meta name="description" content="Plan a new travel trip with Travelloop — choose destinations, dates, and activities." />
+  <link rel="icon" href="{% static 'assets/images/logo.svg' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/components.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/pages.css' %}" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="page-layout">
+    <aside class="page-sidebar" id="sidebar">
+      <a href="{% url 'index' %}" class="sidebar__brand">
+        <div class="tl-logo tl-logo--sm"><img src="{% static 'assets/images/logo.svg' %}" alt="Travelloop" /></div>
+        <span class="tl-brand-text" style="font-size:1.25rem;"><span class="text-travel">Travel</span><span class="text-loop">l<span class="text-oo">oo</span>p</span></span>
+      </a>
+      <nav class="sidebar__nav">
+        <a href="{% url 'dashboard' %}" class="sidebar__link"><i data-lucide="layout-dashboard" style="width:20px;height:20px;"></i> Overview</a>
+        <a href="{% url 'trips' %}" class="sidebar__link"><i data-lucide="map" style="width:20px;height:20px;"></i> My Trips</a>
+        <a href="{% url 'create_trip' %}" class="sidebar__link active"><i data-lucide="plus-circle" style="width:20px;height:20px;"></i> New Trip</a>
+        <a href="{% url 'packing' %}" class="sidebar__link"><i data-lucide="check-square" style="width:20px;height:20px;"></i> Packing</a>
+        <a href="{% url 'notes' %}" class="sidebar__link"><i data-lucide="notebook-pen" style="width:20px;height:20px;"></i> Notes</a>
+        <a href="{% url 'community' %}" class="sidebar__link"><i data-lucide="users" style="width:20px;height:20px;"></i> Community</a>
+        <a href="{% url 'search' %}" class="sidebar__link"><i data-lucide="search" style="width:20px;height:20px;"></i> Explore</a>
+        <a href="{% url 'invoices' %}" class="sidebar__link"><i data-lucide="receipt" style="width:20px;height:20px;"></i> Invoices</a>
+        <a href="{% url 'profile' %}" class="sidebar__link"><i data-lucide="user" style="width:20px;height:20px;"></i> Profile</a>
+      </nav>
+      <div style="border-top:1px solid var(--glass-border);padding-top:var(--sp-4);margin-top:auto;">
+        <div class="flex items-center gap-3" style="padding:var(--sp-2) var(--sp-3);">
+          <div class="avatar" id="sidebarAvatar">T</div>
+          <div>
+            <div class="text-sm font-semi" id="sidebarName">Traveler</div>
+            <div class="text-xs text-muted" id="sidebarEmail">user@email.com</div>
+          </div>
+          <button class="theme-toggle" id="themeToggle" style="margin-left:auto;width:32px;height:32px;" aria-label="Toggle theme">
+            <i data-lucide="sun" style="width:16px;height:16px;"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="page-content">
+      <div class="section-header">
+        <div>
+          <h1 class="section-header__title">Plan a New <span class="gradient-text" style="background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">Trip</span></h1>
+          <p class="section-header__subtitle">Choose your destination and dates to start planning</p>
+        </div>
+      </div>
+
+      <!-- Trip Creation Form -->
+      <div class="create-trip-form">
+        <form class="glass-card glass-card--glow p-6 mb-8" id="createTripForm" onsubmit="return handleCreateTrip(event)">
+          <div class="form-group mb-4">
+            <label class="form-label" for="tripName">Trip Name</label>
+            <input class="form-input form-input--lg" type="text" id="tripName" placeholder="e.g. Impeccable Shark 🦈" required />
+          </div>
+
+          <div class="grid grid-2 gap-4 mb-4">
+            <div class="form-group">
+              <label class="form-label" for="tripPlace">Select a Place</label>
+              <select class="form-input" id="tripPlace" required>
+                <option value="">Choose destination...</option>
+                <option value="paris">Paris, France</option>
+                <option value="tokyo">Tokyo, Japan</option>
+                <option value="bali">Bali, Indonesia</option>
+                <option value="rome">Rome, Italy</option>
+                <option value="santorini">Santorini, Greece</option>
+                <option value="dubai">Dubai, UAE</option>
+                <option value="newyork">New York, USA</option>
+                <option value="swiss">Swiss Alps, Switzerland</option>
+                <option value="london">London, UK</option>
+                <option value="maldives">Maldives</option>
+                <option value="bangkok">Bangkok, Thailand</option>
+                <option value="istanbul">Istanbul, Turkey</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="tripMood">Trip Mood</label>
+              <select class="form-input" id="tripMood">
+                <option value="adventure">🏔️ Adventure</option>
+                <option value="luxury">💎 Luxury</option>
+                <option value="nature">🌿 Nature</option>
+                <option value="budget">💰 Budget</option>
+                <option value="nightlife">🎉 Nightlife</option>
+                <option value="cultural">🏛️ Cultural</option>
+                <option value="romantic">💕 Romantic</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-3 gap-4 mb-6">
+            <div class="form-group">
+              <label class="form-label" for="startDate">Start Date</label>
+              <input class="form-input" type="date" id="startDate" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="endDate">End Date</label>
+              <input class="form-input" type="date" id="endDate" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="tripCurrency">Currency</label>
+              <select class="form-input" id="tripCurrency">
+                <option value="USD">🇺🇸 USD — US Dollar</option>
+                <option value="EUR">🇪🇺 EUR — Euro</option>
+                <option value="GBP">🇬🇧 GBP — British Pound</option>
+                <option value="INR">🇮🇳 INR — Indian Rupee</option>
+                <option value="JPY">🇯🇵 JPY — Japanese Yen</option>
+                <option value="AED">🇦🇪 AED — UAE Dirham</option>
+                <option value="THB">🇹🇭 THB — Thai Baht</option>
+                <option value="AUD">🇦🇺 AUD — Australian Dollar</option>
+                <option value="CAD">🇨🇦 CAD — Canadian Dollar</option>
+                <option value="CHF">🇨🇭 CHF — Swiss Franc</option>
+                <option value="SGD">🇸🇬 SGD — Singapore Dollar</option>
+                <option value="IDR">🇮🇩 IDR — Indonesian Rupiah</option>
+                <option value="TRY">🇹🇷 TRY — Turkish Lira</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn--primary btn--lg" style="width:100%;">
+            <i data-lucide="compass" style="width:20px;height:20px;"></i> Create Trip & Build Itinerary
+          </button>
+        </form>
+      </div>
+
+      <!-- Suggestions Section -->
+      <div class="suggestion-section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-header__title" style="font-size:1.25rem;">Suggested Places to Visit / Activities</h2>
+            <p class="section-header__subtitle">Popular activities and destinations for your trip</p>
+          </div>
+        </div>
+        <div class="suggestion-grid" id="suggestionGrid">
+          <!-- Injected by JS -->
+        </div>
+
+        <!-- AI Suggestion Section -->
+        <div class="glass-card glass-card--glow p-6 mt-6 animate-fadeInUp" style="border:1px solid rgba(var(--cyan-rgb,0,200,200),.15);">
+          <div class="flex items-center gap-3 mb-4">
+            <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--cyan),#a855f7);display:flex;align-items:center;justify-content:center;">🤖</div>
+            <div>
+              <h3 style="font-size:1rem;margin:0;">AI Travel Assistant</h3>
+              <p class="text-xs text-muted">Powered by Groq llama-3.1-8b-instant</p>
+            </div>
+            <button class="btn btn--primary btn--sm" id="aiSuggestBtn" style="margin-left:auto;">
+              <i data-lucide="sparkles" style="width:14px;height:14px;"></i> Generate AI Itinerary
+            </button>
+          </div>
+          <div id="aiResult" style="display:none;">
+            <div id="aiResultContent" class="text-sm" style="white-space:pre-wrap;line-height:1.7;max-height:400px;overflow-y:auto;padding:var(--sp-3);border-radius:var(--radius-md);background:rgba(0,0,0,.2);"></div>
+          </div>
+          <div id="aiLoading" style="display:none;" class="text-center text-muted p-4">
+            <div class="spinner" style="margin:0 auto 8px;width:24px;height:24px;border:3px solid var(--glass-border);border-top-color:var(--cyan);border-radius:50%;animation:spin .8s linear infinite;"></div>
+            Generating AI suggestions...
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="{% static 'js/app.js' %}"></script>
+  <script>
+    // ── User info from API ──
+    (async () => {
+      try {
+        const res = await fetch('/api/profile/');
+        if (res.ok) {
+          const u = await res.json();
+          const name = `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Traveler';
+          const sn = document.getElementById('sidebarName');
+          if (sn) sn.textContent = name;
+          const se = document.getElementById('sidebarEmail');
+          if (se) se.textContent = u.email || '';
+          const sa = document.getElementById('sidebarAvatar');
+          if (sa) sa.textContent = name.charAt(0).toUpperCase();
+        }
+      } catch (e) { console.warn('Profile fetch failed:', e); }
+    })();
+
+    // ── Date constraints ──
+    (function initDateConstraints() {
+      const today = new Date().toISOString().split('T')[0];
+      const startEl = document.getElementById('startDate');
+      const endEl = document.getElementById('endDate');
+
+      // 1) No past dates allowed
+      startEl.setAttribute('min', today);
+      endEl.setAttribute('min', today);
+
+      // 2) End date must be >= start date
+      startEl.addEventListener('change', () => {
+        const startVal = startEl.value;
+        if (startVal) {
+          endEl.setAttribute('min', startVal);
+          // If current end date is before new start, clear it
+          if (endEl.value && endEl.value < startVal) {
+            endEl.value = '';
+            showToast('End date was reset — it cannot be before the start date.', 'info');
+          }
+        }
+      });
+
+      endEl.addEventListener('change', () => {
+        if (endEl.value && startEl.value && endEl.value < startEl.value) {
+          endEl.value = '';
+          showToast('End date cannot be before start date.', 'error');
+        }
+      });
+    })();
+
+    // ── Destination-specific suggestions — each activity has a unique image ──
+    const V = (name, type, img) => ({ name, type, img });
+    const suggestionsByPlace = {
+      paris: [
+        V('Eiffel Tower','Landmark','https://images.pexels.com/photos/338515/pexels-photo-338515.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Louvre Museum','Art','https://images.pexels.com/photos/2363/france-landmark-lights-night.jpg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Notre-Dame','Architecture','https://images.pexels.com/photos/2344/cars-france-landmark-lights.jpg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Seine River Cruise','Experience','https://images.pexels.com/photos/1850619/pexels-photo-1850619.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Montmartre','Neighborhood','https://images.pexels.com/photos/1308940/pexels-photo-1308940.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Champs-Élysées','Shopping','https://images.pexels.com/photos/739407/pexels-photo-739407.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Sacré-Cœur','Church','https://images.pexels.com/photos/2082103/pexels-photo-2082103.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Palace of Versailles','Palace','https://images.pexels.com/photos/2611454/pexels-photo-2611454.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+      ],
+      tokyo: [
+        V('Shibuya Crossing','Landmark','https://images.pexels.com/photos/2506923/pexels-photo-2506923.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Meiji Shrine','Temple','https://images.pexels.com/photos/5169056/pexels-photo-5169056.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Senso-ji Temple','Temple','https://images.pexels.com/photos/5745029/pexels-photo-5745029.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Akihabara','Shopping','https://images.pexels.com/photos/2187605/pexels-photo-2187605.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Mount Fuji Day Trip','Nature','https://images.pexels.com/photos/3408354/pexels-photo-3408354.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Tsukiji Fish Market','Food','https://images.pexels.com/photos/2098085/pexels-photo-2098085.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Tokyo Skytree','Tower','https://images.pexels.com/photos/2614818/pexels-photo-2614818.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Shinjuku Gyoen','Park','https://images.pexels.com/photos/1440476/pexels-photo-1440476.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+      ],
+      bali: [
+        V('Ubud Rice Terraces','Nature','https://images.pexels.com/photos/2166559/pexels-photo-2166559.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Tanah Lot Temple','Temple','https://images.pexels.com/photos/2474689/pexels-photo-2474689.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Seminyak Beach','Beach','https://images.pexels.com/photos/1078983/pexels-photo-1078983.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Monkey Forest','Nature','https://images.pexels.com/photos/3562689/pexels-photo-3562689.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Mount Batur','Hiking','https://images.pexels.com/photos/2468056/pexels-photo-2468056.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Kuta Surfing','Adventure','https://images.pexels.com/photos/390051/surfer-wave-sunset-the-indian-ocean-390051.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Uluwatu Temple','Temple','https://images.pexels.com/photos/2474690/pexels-photo-2474690.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Nusa Penida','Island','https://images.pexels.com/photos/3225528/pexels-photo-3225528.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+      ],
+      rome: [
+        V('Colosseum','History','https://images.pexels.com/photos/532263/pexels-photo-532263.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Vatican Museums','Art','https://images.pexels.com/photos/3220846/pexels-photo-3220846.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Trevi Fountain','Landmark','https://images.pexels.com/photos/2748019/pexels-photo-2748019.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Roman Forum','History','https://images.pexels.com/photos/2225442/pexels-photo-2225442.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Pantheon','Architecture','https://images.pexels.com/photos/2064827/pexels-photo-2064827.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Trastevere','Neighborhood','https://images.pexels.com/photos/1797161/pexels-photo-1797161.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Spanish Steps','Landmark','https://images.pexels.com/photos/2422259/pexels-photo-2422259.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Borghese Gallery','Art','https://images.pexels.com/photos/2676642/pexels-photo-2676642.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+      ],
+      santorini: [
+        V('Oia Sunset','Scenic','https://images.pexels.com/photos/1010657/pexels-photo-1010657.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Red Beach','Beach','https://images.pexels.com/photos/1285625/pexels-photo-1285625.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Fira Town','Town','https://images.pexels.com/photos/1285626/pexels-photo-1285626.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Akrotiri Ruins','History','https://images.pexels.com/photos/4254555/pexels-photo-4254555.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Wine Tasting','Experience','https://images.pexels.com/photos/1123260/pexels-photo-1123260.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Caldera Cruise','Boat','https://images.pexels.com/photos/1430672/pexels-photo-1430672.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Perissa Beach','Beach','https://images.pexels.com/photos/1174732/pexels-photo-1174732.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Ancient Thera','Ruins','https://images.pexels.com/photos/164336/pexels-photo-164336.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+      ],
+      dubai: [
+        V('Burj Khalifa','Architecture','https://images.pexels.com/photos/1707310/pexels-photo-1707310.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Dubai Mall','Shopping','https://images.pexels.com/photos/1118873/pexels-photo-1118873.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Desert Safari','Adventure','https://images.pexels.com/photos/1703312/pexels-photo-1703312.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Palm Jumeirah','Island','https://images.pexels.com/photos/2044434/pexels-photo-2044434.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Dubai Marina','Waterfront','https://images.pexels.com/photos/2115367/pexels-photo-2115367.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Gold Souk','Market','https://images.pexels.com/photos/3622614/pexels-photo-3622614.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Burj Al Arab','Hotel','https://images.pexels.com/photos/2115381/pexels-photo-2115381.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Dubai Frame','Landmark','https://images.pexels.com/photos/3214958/pexels-photo-3214958.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+      ],
+      newyork: [
+        V('Central Park','Park','https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Statue of Liberty','Landmark','https://images.pexels.com/photos/290386/pexels-photo-290386.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Times Square','Entertainment','https://images.pexels.com/photos/802024/pexels-photo-802024.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Brooklyn Bridge','Landmark','https://images.pexels.com/photos/1239162/pexels-photo-1239162.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('MoMA','Art','https://images.pexels.com/photos/20967/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Broadway Show','Theater','https://images.pexels.com/photos/713149/pexels-photo-713149.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Empire State','Skyscraper','https://images.pexels.com/photos/2190283/pexels-photo-2190283.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('High Line','Park','https://images.pexels.com/photos/1486222/pexels-photo-1486222.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+      ],
+      swiss: [
+        V('Jungfraujoch','Mountain','https://images.pexels.com/photos/691668/pexels-photo-691668.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Lake Lucerne','Nature','https://images.pexels.com/photos/2662116/pexels-photo-2662116.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Matterhorn','Mountain','https://images.pexels.com/photos/1054218/pexels-photo-1054218.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Interlaken','Adventure','https://images.pexels.com/photos/1586298/pexels-photo-1586298.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Swiss Chocolate Tour','Food','https://images.pexels.com/photos/918327/pexels-photo-918327.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Glacier Express','Train','https://images.pexels.com/photos/1658967/pexels-photo-1658967.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Rhine Falls','Waterfall','https://images.pexels.com/photos/2743287/pexels-photo-2743287.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Zermatt','Village','https://images.pexels.com/photos/1438761/pexels-photo-1438761.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+      ],
+      london: [
+        V('Big Ben','Landmark','https://images.pexels.com/photos/77171/pexels-photo-77171.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Tower Bridge','Bridge','https://images.pexels.com/photos/427679/pexels-photo-427679.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Buckingham Palace','Palace','https://images.pexels.com/photos/672532/pexels-photo-672532.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('British Museum','Museum','https://images.pexels.com/photos/2675266/pexels-photo-2675266.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('London Eye','Attraction','https://images.pexels.com/photos/460672/pexels-photo-460672.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Hyde Park','Park','https://images.pexels.com/photos/1134176/pexels-photo-1134176.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Camden Market','Market','https://images.pexels.com/photos/3183150/pexels-photo-3183150.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Westminster Abbey','Church','https://images.pexels.com/photos/258117/pexels-photo-258117.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+      ],
+      maldives: [
+        V('Overwater Villas','Resort','https://images.pexels.com/photos/1287460/pexels-photo-1287460.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Snorkeling','Water Sport','https://images.pexels.com/photos/1645028/pexels-photo-1645028.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Sunset Cruise','Boat','https://images.pexels.com/photos/1430677/pexels-photo-1430677.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Whale Shark Tour','Wildlife','https://images.pexels.com/photos/3369102/pexels-photo-3369102.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Beach Dining','Food','https://images.pexels.com/photos/1268855/pexels-photo-1268855.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Coral Reef Dive','Diving','https://images.pexels.com/photos/3046637/pexels-photo-3046637.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Sandbank Picnic','Beach','https://images.pexels.com/photos/1032650/pexels-photo-1032650.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Spa Retreat','Wellness','https://images.pexels.com/photos/3757942/pexels-photo-3757942.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+      ],
+      bangkok: [
+        V('Grand Palace','Palace','https://images.pexels.com/photos/1682748/pexels-photo-1682748.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Wat Arun','Temple','https://images.pexels.com/photos/1630039/pexels-photo-1630039.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Chatuchak Market','Market','https://images.pexels.com/photos/2889685/pexels-photo-2889685.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Khao San Road','Nightlife','https://images.pexels.com/photos/1190298/pexels-photo-1190298.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Floating Markets','Market','https://images.pexels.com/photos/2474661/pexels-photo-2474661.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Chinatown','Neighborhood','https://images.pexels.com/photos/3075993/pexels-photo-3075993.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Jim Thompson House','Museum','https://images.pexels.com/photos/2161449/pexels-photo-2161449.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Wat Pho','Temple','https://images.pexels.com/photos/2810634/pexels-photo-2810634.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+      ],
+      istanbul: [
+        V('Hagia Sophia','Mosque','https://images.pexels.com/photos/2042032/pexels-photo-2042032.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Blue Mosque','Mosque','https://images.pexels.com/photos/2042031/pexels-photo-2042031.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Grand Bazaar','Market','https://images.pexels.com/photos/2846217/pexels-photo-2846217.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Topkapi Palace','Palace','https://images.pexels.com/photos/3684380/pexels-photo-3684380.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Bosphorus Cruise','Boat','https://images.pexels.com/photos/2108832/pexels-photo-2108832.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Basilica Cistern','History','https://images.pexels.com/photos/3732468/pexels-photo-3732468.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Galata Tower','Tower','https://images.pexels.com/photos/3689859/pexels-photo-3689859.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+        V('Spice Bazaar','Market','https://images.pexels.com/photos/2661248/pexels-photo-2661248.jpeg?auto=compress&cs=tinysrgb&w=400&h=300&fit=crop'),
+      ],
+    };
+
+    function renderSuggestions(place) {
+      const grid = document.getElementById('suggestionGrid');
+      grid.innerHTML = '';
+      const list = suggestionsByPlace[place] || Object.values(suggestionsByPlace).flat().sort(() => 0.5 - Math.random()).slice(0, 8);
+      list.forEach((s, i) => {
+        const card = document.createElement('div');
+        card.className = `suggestion-card glass-card animate-fadeInUp delay-${(i % 6) + 1}`;
+        card.innerHTML = `
+          <img class="suggestion-card__img" src="${s.img}" alt="${s.name}" loading="lazy" onerror="this.style.display='none'" />
+          <div class="suggestion-card__label">
+            <div>${s.name}</div>
+            <div style="font-size:0.7rem;opacity:0.7;">${s.type}</div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // Update suggestions when place changes
+    document.getElementById('tripPlace').addEventListener('change', (e) => {
+      renderSuggestions(e.target.value);
+    });
+
+    // Initial render
+    renderSuggestions('');
+
+    // ── Create Trip — POST to backend ──
+    async function handleCreateTrip(e) {
+      e.preventDefault();
+
+      const nameEl = document.getElementById('tripName');
+      const placeEl = document.getElementById('tripPlace');
+      const moodEl = document.getElementById('tripMood');
+      const startEl = document.getElementById('startDate');
+      const endEl = document.getElementById('endDate');
+
+      const tripName = nameEl.value.trim();
+      const destination = placeEl.options[placeEl.selectedIndex].text;
+      const mood = moodEl.value;
+      const startDate = startEl.value;
+      const endDate = endEl.value;
+
+      if (!tripName || !destination || !startDate || !endDate) {
+        showToast('Please fill in all fields', 'error');
+        return false;
+      }
+
+      if (new Date(endDate) < new Date(startDate)) {
+        showToast('End date must be after start date', 'error');
+        return false;
+      }
+
+      try {
+        const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+        const res = await fetch('/api/trips/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+          body: JSON.stringify({
+            name: tripName,
+            destination: destination,
+            mood: mood,
+            startDate: startDate,
+            endDate: endDate,
+            currency: document.getElementById('tripCurrency').value,
+            budget: 0,
+          }),
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.error || 'Failed to create trip');
+        }
+
+        const result = await res.json();
+        showToast(`Trip "${tripName}" created! Building itinerary...`, 'success');
+        setTimeout(() => {
+          window.location.href = "{% url 'build_itinerary' %}?trip=" + result.tripId;
+        }, 1000);
+      } catch (err) {
+        console.error('Create trip error:', err);
+        showToast('Failed to create trip: ' + err.message, 'error');
+      }
+      return false;
+    }
+
+    // ── AI Itinerary Generator ──
+    document.getElementById('aiSuggestBtn').addEventListener('click', async () => {
+      const place = document.getElementById('tripPlace');
+      const dest = place.options[place.selectedIndex]?.text || '';
+      const mood = document.getElementById('tripMood').value || 'adventure';
+      const startD = document.getElementById('startDate').value;
+      const endD = document.getElementById('endDate').value;
+      let days = 3;
+      if (startD && endD) {
+        const diff = (new Date(endD) - new Date(startD)) / 86400000;
+        if (diff > 0) days = Math.min(diff, 10);
+      }
+      if (!dest || dest === 'Select destination') { showToast('Select a destination first','error'); return; }
+
+      document.getElementById('aiLoading').style.display = 'block';
+      document.getElementById('aiResult').style.display = 'none';
+
+      try {
+        const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+        const r = await fetch('/api/ai/suggest/', {
+          method: 'POST', headers: {'Content-Type':'application/json','X-CSRFToken':csrfToken},
+          body: JSON.stringify({ type: 'itinerary', destination: dest, days, mood }),
+        });
+        const d = await r.json();
+        document.getElementById('aiLoading').style.display = 'none';
+        document.getElementById('aiResult').style.display = 'block';
+
+        const container = document.getElementById('aiResultContent');
+        const str = v => typeof v === 'object' && v !== null ? (v.activity || v.description || v.name || JSON.stringify(v)) : String(v || '');
+        if (d.data && Array.isArray(d.data)) {
+          container.innerHTML = d.data.map(day => `
+            <div style="margin-bottom:16px;padding:12px;border-radius:8px;background:rgba(var(--cyan-rgb,0,200,200),.04);border-left:3px solid var(--cyan);">
+              <strong style="color:var(--cyan);">Day ${day.day}</strong>
+              <div style="margin-top:6px;">🌅 <strong>Morning:</strong> ${str(day.morning)}</div>
+              <div>☀️ <strong>Afternoon:</strong> ${str(day.afternoon)}</div>
+              <div>🌙 <strong>Evening:</strong> ${str(day.evening)}</div>
+              ${day.tip ? `<div style="margin-top:4px;font-style:italic;opacity:.7;">💡 ${str(day.tip)}</div>` : ''}
+            </div>
+          `).join('');
+        } else {
+          container.textContent = d.raw || 'No suggestions available.';
+        }
+      } catch(e) {
+        document.getElementById('aiLoading').style.display = 'none';
+        showToast('AI error: ' + e.message, 'error');
+      }
+    });
+  </script>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+</body>
+</html>

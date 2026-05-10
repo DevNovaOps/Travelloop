@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <defs>
+    <!-- Main Gradient for Infinity Loop -->
+    <linearGradient id="loopGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00E5FF" />
+      <stop offset="50%" stop-color="#2979FF" />
+      <stop offset="100%" stop-color="#D500F9" />
+    </linearGradient>
+
+    <!-- Gradient for Mountains -->
+    <linearGradient id="mountainGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2979FF" />
+      <stop offset="100%" stop-color="#0A192F" />
+    </linearGradient>
+
+    <!-- Inner drop shadow for the infinity loop line -->
+    <filter id="loopShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000" flood-opacity="0.25"/>
+    </filter>
+
+    <!-- Glow filter -->
+    <filter id="gl" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="2.5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- ================= BACKGROUND ELEMENTS (Inside loops) ================= -->
+  
+  <!-- LEFT LOOP: Nature (Mountains, Trees, Water) -->
+  <g id="nature-scene">
+    <!-- Sun and Clouds -->
+    <circle cx="120" cy="110" r="14" fill="#FFC107" opacity="0.9"/>
+    <path d="M 60 100 Q 65 95 75 100 Q 80 90 90 95 Q 95 90 100 95 Q 105 100 100 105 L 60 105 Z" fill="#e0f7fa" opacity="0.8"/>
+    
+    <!-- Birds -->
+    <path d="M 90 85 Q 95 80 100 85 Q 95 82 90 85" fill="none" stroke="#455a64" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M 110 75 Q 115 70 120 75 Q 115 72 110 75" fill="none" stroke="#455a64" stroke-width="1.5" stroke-linecap="round"/>
+    
+    <!-- Mountains -->
+    <polygon points="50,180 90,105 130,180" fill="#448aff"/>
+    <polygon points="90,105 82,125 90,135 99,125" fill="#ffffff" opacity="0.95"/>
+    
+    <polygon points="100,180 145,115 190,180" fill="#1976d2"/>
+    <polygon points="145,115 138,130 145,140 153,130" fill="#ffffff" opacity="0.95"/>
+    
+    <polygon points="75,180 120,125 165,180" fill="url(#mountainGrad)"/>
+    <polygon points="120,125 113,138 120,146 128,138" fill="#ffffff" opacity="0.95"/>
+
+    <!-- Trees -->
+    <polygon points="60,180 66,150 72,180" fill="#004d40"/>
+    <polygon points="70,180 78,140 86,180" fill="#00695c"/>
+    <polygon points="82,180 88,155 94,180" fill="#00897b"/>
+    <polygon points="140,180 145,160 150,180" fill="#00695c"/>
+
+    <!-- Water/River with reflections -->
+    <path d="M 40 180 Q 110 205 160 175 L 170 210 L 40 210 Z" fill="#00E5FF" opacity="0.85"/>
+    <path d="M 60 185 Q 110 200 140 180" fill="none" stroke="#ffffff" stroke-width="2" opacity="0.4" stroke-linecap="round"/>
+  </g>
+
+  <!-- RIGHT LOOP: City (Ferris Wheel, Buildings) -->
+  <g id="city-scene">
+    <!-- Ferris Wheel -->
+    <g transform="translate(250, 135)">
+      <polygon points="0,0 -14,45 14,45" fill="none" stroke="#D500F9" stroke-width="2.5" stroke-linejoin="round"/>
+      <circle cx="0" cy="0" r="5" fill="#aa00ff"/>
+      
+      <g>
+        <animateTransform attributeName="transform" type="rotate" from="0 0 0" to="360 0 0" dur="15s" repeatCount="indefinite" />
+        <circle cx="0" cy="0" r="24" fill="none" stroke="#D500F9" stroke-width="2"/>
+        <circle cx="0" cy="0" r="20" fill="none" stroke="#e040fb" stroke-width="0.5" opacity="0.5"/>
+        <line x1="0" y1="-24" x2="0" y2="24" stroke="#D500F9" stroke-width="1.5"/>
+        <line x1="-24" y1="0" x2="24" y2="0" stroke="#D500F9" stroke-width="1.5"/>
+        <line x1="-17" y1="-17" x2="17" y2="17" stroke="#D500F9" stroke-width="1.5"/>
+        <line x1="-17" y1="17" x2="17" y2="-17" stroke="#D500F9" stroke-width="1.5"/>
+        <circle cx="0" cy="-24" r="2.5" fill="#FF4081"/>
+        <circle cx="0" cy="24" r="2.5" fill="#FF4081"/>
+        <circle cx="-24" cy="0" r="2.5" fill="#FF4081"/>
+        <circle cx="24" cy="0" r="2.5" fill="#FF4081"/>
+        <circle cx="-17" cy="-17" r="2.5" fill="#FF4081"/>
+        <circle cx="17" cy="17" r="2.5" fill="#FF4081"/>
+        <circle cx="-17" cy="17" r="2.5" fill="#FF4081"/>
+        <circle cx="17" cy="-17" r="2.5" fill="#FF4081"/>
+      </g>
+    </g>
+
+    <!-- Buildings -->
+    <rect x="282" y="120" width="16" height="60" fill="#aa00ff" rx="1"/>
+    <rect x="286" y="125" width="3" height="5" fill="#FFF59D"/>
+    <rect x="291" y="125" width="3" height="5" fill="#FFF59D"/>
+    <rect x="286" y="135" width="3" height="5" fill="#FFF59D"/>
+    <rect x="286" y="145" width="3" height="5" fill="#FFF59D"/>
+    <rect x="291" y="155" width="3" height="5" fill="#FFF59D"/>
+    
+    <!-- Clock Tower -->
+    <rect x="302" y="95" width="18" height="85" fill="#7b1fa2" rx="1"/>
+    <polygon points="300,95 311,65 322,95" fill="#4a148c"/>
+    <circle cx="311" cy="110" r="5.5" fill="#ffffff"/>
+    <circle cx="311" cy="110" r="1.5" fill="#7b1fa2"/>
+    <line x1="311" y1="110" x2="311" y2="106" stroke="#7b1fa2" stroke-width="1"/>
+    <line x1="311" y1="110" x2="314" y2="110" stroke="#7b1fa2" stroke-width="1"/>
+    
+    <!-- Right Building -->
+    <rect x="324" y="135" width="20" height="45" fill="#e040fb" rx="1"/>
+    <polygon points="322,135 334,120 346,135" fill="#d500f9"/>
+    <rect x="328" y="145" width="4" height="4" fill="#FFF59D"/>
+    <rect x="336" y="145" width="4" height="4" fill="#FFF59D"/>
+    <rect x="336" y="155" width="4" height="4" fill="#FFF59D"/>
+  </g>
+
+  <!-- ================= THE INFINITY LOOP ================= -->
+  <path 
+    d="M 200 150 
+       C 120 40, 40 40, 40 150 
+       C 40 260, 120 260, 200 150 
+       C 280 40, 360 40, 360 150 
+       C 360 260, 280 260, 200 150 Z" 
+    fill="none" 
+    stroke="url(#loopGradient)" 
+    stroke-width="22" 
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    filter="url(#loopShadow)"
+  />
+
+  <!-- ===== LOCATION PIN ===== -->
+  <g transform="translate(88, 28) scale(1.6)" filter="url(#gl)">
+    <ellipse cx="12" cy="24" rx="6" ry="2" fill="#0A192F" opacity="0.15"/>
+    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#00E5FF"/>
+    <path d="M10 5.5A3.5 3.5 0 0 1 12 5a3.5 3.5 0 0 1 2 .6A4.5 4.5 0 0 0 12 3a4.5 4.5 0 0 0-2 2.5z" fill="#ffffff" opacity="0.4"/>
+  </g>
+
+  <!-- ===== AIRPLANE & TRAJECTORY ===== -->
+  <g id="airplane-flight">
+    <path d="M 200 150 Q 240 60 330 40" fill="none" stroke="#00E5FF" stroke-width="3" stroke-dasharray="8 8" stroke-linecap="round" opacity="0.6"/>
+    
+    <g transform="translate(320, 10) rotate(45) scale(1.4)">
+      <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z" fill="#E2E8F0"/>
+      <path d="M11.5 8L18 12.5L20.5 14L11.5 11Z" fill="#2979FF" opacity="0.3"/>
+    </g>
+  </g>
+</svg>

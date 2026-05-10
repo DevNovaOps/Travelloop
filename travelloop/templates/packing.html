@@ -1,0 +1,331 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Packing Checklist — Travelloop</title>
+  <meta name="description" content="Never forget essentials again — manage your packing checklist for each trip." />
+  <link rel="icon" href="{% static 'assets/images/logo.svg' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/components.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/pages.css' %}" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="page-layout">
+    <aside class="page-sidebar" id="sidebar">
+      <a href="{% url 'index' %}" class="sidebar__brand">
+        <div class="tl-logo tl-logo--sm"><img src="{% static 'assets/images/logo.svg' %}" alt="Travelloop" /></div>
+        <span class="tl-brand-text" style="font-size:1.25rem;"><span class="text-travel">Travel</span><span class="text-loop">l<span class="text-oo">oo</span>p</span></span>
+      </a>
+      <nav class="sidebar__nav">
+        <a href="{% url 'dashboard' %}" class="sidebar__link"><i data-lucide="layout-dashboard" style="width:20px;height:20px;"></i> Overview</a>
+        <a href="{% url 'trips' %}" class="sidebar__link"><i data-lucide="map" style="width:20px;height:20px;"></i> My Trips</a>
+        <a href="{% url 'create_trip' %}" class="sidebar__link"><i data-lucide="plus-circle" style="width:20px;height:20px;"></i> New Trip</a>
+        <a href="{% url 'packing' %}" class="sidebar__link active"><i data-lucide="check-square" style="width:20px;height:20px;"></i> Packing</a>
+        <a href="{% url 'notes' %}" class="sidebar__link"><i data-lucide="notebook-pen" style="width:20px;height:20px;"></i> Notes</a>
+        <a href="{% url 'community' %}" class="sidebar__link"><i data-lucide="users" style="width:20px;height:20px;"></i> Community</a>
+        <a href="{% url 'search' %}" class="sidebar__link"><i data-lucide="search" style="width:20px;height:20px;"></i> Explore</a>
+        <a href="{% url 'invoices' %}" class="sidebar__link"><i data-lucide="receipt" style="width:20px;height:20px;"></i> Invoices</a>
+        <a href="{% url 'profile' %}" class="sidebar__link"><i data-lucide="user" style="width:20px;height:20px;"></i> Profile</a>
+      </nav>
+      <div style="border-top:1px solid var(--glass-border);padding-top:var(--sp-4);margin-top:auto;">
+        <div class="flex items-center gap-3" style="padding:var(--sp-2) var(--sp-3);">
+          <div class="avatar" id="sidebarAvatar">T</div>
+          <div><div class="text-sm font-semi" id="sidebarName">Traveler</div><div class="text-xs text-muted" id="sidebarEmail">user@travelloop.com</div></div>
+          <button class="theme-toggle" id="themeToggle" style="margin-left:auto;width:32px;height:32px;" aria-label="Toggle theme"><i data-lucide="sun" style="width:16px;height:16px;"></i></button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="page-content">
+      <div class="search-toolbar">
+        <i data-lucide="search" style="width:18px;height:18px;color:var(--text-dim);flex-shrink:0;"></i>
+        <input class="search-toolbar__input" type="text" placeholder="Search items..." id="packSearch" />
+        <div class="search-toolbar__actions">
+          <button class="toolbar-btn" id="groupByBtn"><i data-lucide="layout-grid" style="width:14px;height:14px;"></i> Group by</button>
+          <button class="toolbar-btn" id="filterBtn"><i data-lucide="filter" style="width:14px;height:14px;"></i> Filter</button>
+          <button class="toolbar-btn" id="sortByBtn"><i data-lucide="arrow-up-down" style="width:14px;height:14px;"></i> Sort by</button>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <div>
+          <h1 class="section-header__title">Packing Checklist</h1>
+          <p class="section-header__subtitle">Keep track of everything you need to pack</p>
+        </div>
+      </div>
+
+      <!-- Trip Selector -->
+      <div class="glass-card glass-card--glow p-6 mb-6 animate-fadeInUp">
+        <div class="flex items-center gap-4 mb-4">
+          <select class="form-input" style="max-width:300px;" id="tripSelect">
+            <option value="">Loading trips...</option>
+          </select>
+        </div>
+        <div class="checklist-progress">
+          <div class="flex justify-between items-center">
+            <span class="text-sm font-semi">Progress: <span id="progressText" class="text-cyan">0/0 items packed</span></span>
+            <span class="text-xs text-dim" id="progressPercent">0%</span>
+          </div>
+          <div class="checklist-progress__bar">
+            <div class="checklist-progress__fill" id="progressBar" style="width:0%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="checklistContainer"></div>
+
+      <div class="checklist-actions animate-fadeInUp delay-4">
+        <button class="btn btn--secondary" id="addItemBtn"><i data-lucide="plus" style="width:16px;height:16px;"></i> Add Item to Checklist</button>
+        <button class="btn btn--ghost" id="resetBtn"><i data-lucide="rotate-ccw" style="width:16px;height:16px;"></i> Reset All</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add Item Modal -->
+  <div class="modal-overlay" id="addItemModal" style="display:none;">
+    <div class="glass-card p-6" style="width:420px;max-width:90vw;">
+      <h3 style="margin-bottom:var(--sp-4);">Add Packing Item</h3>
+      <div class="form-group mb-4">
+        <label class="form-label">Item Name</label>
+        <input class="form-input" type="text" id="modalItemName" placeholder="e.g. Sunscreen SPF 50+" />
+      </div>
+      <div class="form-group mb-4">
+        <label class="form-label">Category</label>
+        <select class="form-input" id="modalItemCategory">
+          <option value="Documents">📄 Documents</option>
+          <option value="Clothing" selected>👕 Clothing</option>
+          <option value="Electronics">📱 Electronics</option>
+          <option value="Toiletries">🧴 Toiletries</option>
+          <option value="Medicine">💊 Medicine</option>
+          <option value="Accessories">🎒 Accessories</option>
+          <option value="Other">📦 Other</option>
+        </select>
+      </div>
+      <div class="flex gap-3" style="justify-content:flex-end;">
+        <button class="btn btn--ghost" onclick="closeModal('addItemModal')">Cancel</button>
+        <button class="btn btn--primary" id="modalAddBtn">Add Item</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="{% static 'js/app.js' %}"></script>
+  <script>
+    let currentTripId = null;
+    let checklistData = [];
+    let sortMode = 'default';
+    let filterMode = 'all';
+
+    // ── User info ──
+    (async () => {
+      try {
+        const r = await fetch('/api/profile/');
+        if (r.ok) {
+          const u = await r.json();
+          const n = `${u.firstName||''} ${u.lastName||''}`.trim()||'Traveler';
+          document.getElementById('sidebarName').textContent = n;
+          document.getElementById('sidebarAvatar').textContent = n.charAt(0).toUpperCase();
+          if (document.getElementById('sidebarEmail')) document.getElementById('sidebarEmail').textContent = u.email||'';
+        }
+      } catch(e){}
+    })();
+
+    // ── Load trips into selector ──
+    async function loadTrips() {
+      try {
+        const r = await fetch('/api/trips/');
+        if (!r.ok) return;
+        const d = await r.json();
+        const sel = document.getElementById('tripSelect');
+        sel.innerHTML = '';
+        if (!d.trips || d.trips.length === 0) {
+          sel.innerHTML = '<option value="">No trips yet — create one first</option>';
+          return;
+        }
+        d.trips.forEach(t => {
+          const o = document.createElement('option');
+          o.value = t.id;
+          o.textContent = `Trip: ${t.name}`;
+          sel.appendChild(o);
+        });
+        currentTripId = d.trips[0].id;
+        loadPacking();
+      } catch(e) { console.error(e); }
+    }
+
+    document.getElementById('tripSelect').addEventListener('change', (e) => {
+      currentTripId = e.target.value;
+      if (currentTripId) loadPacking();
+    });
+
+    // ── Load packing from backend ──
+    async function loadPacking() {
+      if (!currentTripId) return;
+      try {
+        const r = await fetch(`/api/trips/${currentTripId}/packing/`);
+        if (!r.ok) throw new Error();
+        const d = await r.json();
+        checklistData = (d.categories || []).map(c => ({
+          id: c.id, category: c.name, icon: c.icon || 'box',
+          items: c.items.map(i => ({ id: i.id, text: i.text, checked: i.isPacked }))
+        }));
+        if (checklistData.length === 0) {
+          // Seed default categories
+          checklistData = [
+            { category: 'Documents', icon: 'file-text', items: [] },
+            { category: 'Clothing', icon: 'shirt', items: [] },
+            { category: 'Electronics', icon: 'smartphone', items: [] },
+            { category: 'Toiletries', icon: 'droplets', items: [] },
+          ];
+        }
+        renderChecklist();
+      } catch(e) { console.error('Load packing error:', e); }
+    }
+
+    function updateProgress() {
+      let total = 0, checked = 0;
+      checklistData.forEach(c => c.items.forEach(i => { total++; if (i.checked) checked++; }));
+      const pct = total ? Math.round((checked/total)*100) : 0;
+      document.getElementById('progressText').textContent = `${checked}/${total} items packed`;
+      document.getElementById('progressPercent').textContent = `${pct}%`;
+      document.getElementById('progressBar').style.width = `${pct}%`;
+    }
+
+    function renderChecklist() {
+      const container = document.getElementById('checklistContainer');
+      const search = document.getElementById('packSearch').value.toLowerCase();
+      container.innerHTML = '';
+      let data = checklistData;
+      if (sortMode === 'alpha') data = [...data].sort((a,b) => a.category.localeCompare(b.category));
+
+      data.forEach((cat, ci) => {
+        let items = cat.items;
+        if (search) items = items.filter(i => i.text.toLowerCase().includes(search));
+        if (filterMode === 'packed') items = items.filter(i => i.checked);
+        if (filterMode === 'unpacked') items = items.filter(i => !i.checked);
+        if (items.length === 0 && search) return;
+
+        const checkedCount = items.filter(i => i.checked).length;
+        const catEl = document.createElement('div');
+        catEl.className = `checklist-category animate-fadeInUp delay-${Math.min(ci+1,4)}`;
+        catEl.innerHTML = `
+          <div class="checklist-category__header">
+            <div class="flex items-center gap-2">
+              <i data-lucide="${cat.icon}" style="width:16px;height:16px;color:var(--cyan);"></i>
+              <span class="checklist-category__title">${cat.category}</span>
+            </div>
+            <span class="checklist-category__count">${checkedCount}/${items.length}</span>
+          </div>`;
+
+        items.forEach(item => {
+          const el = document.createElement('div');
+          el.className = `checklist-item ${item.checked ? 'checked' : ''}`;
+          el.innerHTML = `<input type="checkbox" ${item.checked?'checked':''}/><span class="checklist-item__text">${item.text}</span>
+            <button class="btn btn--ghost btn--sm" style="margin-left:auto;padding:2px;" title="Delete" onclick="deleteItem(${item.id},'${item.text.replace(/'/g,"\\'")}')"><i data-lucide="x" style="width:14px;height:14px;color:var(--danger);"></i></button>`;
+          el.querySelector('input').addEventListener('change', (e) => {
+            item.checked = e.target.checked;
+            el.classList.toggle('checked', item.checked);
+            updateProgress();
+            const cnt = cat.items.filter(i => i.checked).length;
+            catEl.querySelector('.checklist-category__count').textContent = `${cnt}/${cat.items.length}`;
+            if (item.id) toggleItem(item.id, item.checked);
+          });
+          catEl.appendChild(el);
+        });
+        container.appendChild(catEl);
+      });
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+      updateProgress();
+    }
+
+    async function toggleItem(itemId, isPacked) {
+      if (!currentTripId) return;
+      const csrf = document.cookie.match(/csrftoken=([^;]+)/)?.[1]||'';
+      try {
+        await fetch(`/api/trips/${currentTripId}/packing/${itemId}/`, {
+          method: 'PUT', headers: {'Content-Type':'application/json','X-CSRFToken':csrf},
+          body: JSON.stringify({ isPacked }),
+        });
+      } catch(e){}
+    }
+
+    async function deleteItem(itemId, name) {
+      if (!currentTripId || !itemId) return;
+      const csrf = document.cookie.match(/csrftoken=([^;]+)/)?.[1]||'';
+      try {
+        await fetch(`/api/trips/${currentTripId}/packing/${itemId}/`, {
+          method: 'DELETE', headers: {'X-CSRFToken':csrf},
+        });
+        checklistData.forEach(c => { c.items = c.items.filter(i => i.id !== itemId); });
+        renderChecklist();
+        showToast(`"${name}" removed`, 'info');
+      } catch(e){}
+    }
+
+    // ── Modal helpers ──
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    document.getElementById('addItemBtn').addEventListener('click', () => openModal('addItemModal'));
+    document.getElementById('modalAddBtn').addEventListener('click', async () => {
+      const name = document.getElementById('modalItemName').value.trim();
+      const catName = document.getElementById('modalItemCategory').value;
+      if (!name) { showToast('Enter an item name','error'); return; }
+      if (!currentTripId) { showToast('Select a trip first','error'); return; }
+
+      const csrf = document.cookie.match(/csrftoken=([^;]+)/)?.[1]||'';
+      const iconMap = { Documents:'file-text', Clothing:'shirt', Electronics:'smartphone', Toiletries:'droplets', Medicine:'pill', Accessories:'backpack', Other:'box' };
+      try {
+        const r = await fetch(`/api/trips/${currentTripId}/packing/`, {
+          method:'POST', headers:{'Content-Type':'application/json','X-CSRFToken':csrf},
+          body: JSON.stringify({ text: name, category: catName, icon: iconMap[catName]||'box' }),
+        });
+        if (r.ok) {
+          const d = await r.json();
+          let cat = checklistData.find(c => c.category === catName);
+          if (!cat) { cat = { category: catName, icon: iconMap[catName]||'box', items: [] }; checklistData.push(cat); }
+          cat.items.push({ id: d.itemId, text: name, checked: false });
+          renderChecklist();
+          showToast(`"${name}" added to ${catName}`, 'success');
+          document.getElementById('modalItemName').value = '';
+          closeModal('addItemModal');
+        }
+      } catch(e) { showToast('Failed to add item','error'); }
+    });
+
+    document.getElementById('resetBtn').addEventListener('click', () => {
+      checklistData.forEach(c => c.items.forEach(i => { i.checked = false; if (i.id) toggleItem(i.id, false); }));
+      renderChecklist();
+      showToast('Checklist reset', 'info');
+    });
+
+    // ── Toolbar buttons ──
+    document.getElementById('sortByBtn').addEventListener('click', () => {
+      sortMode = sortMode === 'alpha' ? 'default' : 'alpha';
+      renderChecklist();
+      showToast(`Sorted ${sortMode === 'alpha' ? 'A-Z' : 'by category'}`, 'info');
+    });
+    document.getElementById('filterBtn').addEventListener('click', () => {
+      const modes = ['all','packed','unpacked'];
+      filterMode = modes[(modes.indexOf(filterMode)+1) % modes.length];
+      renderChecklist();
+      showToast(`Showing: ${filterMode}`, 'info');
+    });
+    document.getElementById('groupByBtn').addEventListener('click', () => {
+      showToast('Items are grouped by category', 'info');
+    });
+
+    document.getElementById('packSearch').addEventListener('input', () => renderChecklist());
+
+    // Close modal on overlay click
+    document.getElementById('addItemModal').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeModal('addItemModal');
+    });
+
+    loadTrips();
+  </script>
+</body>
+</html>

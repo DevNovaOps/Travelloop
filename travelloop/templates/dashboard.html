@@ -1,0 +1,194 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Travelloop</title>
+  <meta name="description" content="Your personal travel dashboard — manage trips, view budgets, and explore itineraries." />
+  <link rel="icon" href="{% static 'assets/images/logo.svg' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/components.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/pages.css' %}" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <!-- ========== PAGE LAYOUT ========== -->
+  <div class="page-layout">
+    <aside class="page-sidebar" id="sidebar">
+      <a href="{% url 'index' %}" class="sidebar__brand">
+        <div class="tl-logo tl-logo--sm">
+          <img src="{% static 'assets/images/logo.svg' %}" alt="Travelloop" />
+        </div>
+        <span class="tl-brand-text" style="font-size:1.25rem;"><span class="text-travel">Travel</span><span class="text-loop">l<span class="text-oo">oo</span>p</span></span>
+      </a>
+      <nav class="sidebar__nav">
+        <a href="{% url 'dashboard' %}" class="sidebar__link active" data-section="overview">
+          <i data-lucide="layout-dashboard" style="width:20px;height:20px;"></i> Overview
+        </a>
+        <a href="{% url 'trips' %}" class="sidebar__link">
+          <i data-lucide="map" style="width:20px;height:20px;"></i> My Trips
+        </a>
+        <a href="{% url 'create_trip' %}" class="sidebar__link">
+          <i data-lucide="plus-circle" style="width:20px;height:20px;"></i> New Trip
+        </a>
+        <a href="{% url 'packing' %}" class="sidebar__link">
+          <i data-lucide="check-square" style="width:20px;height:20px;"></i> Packing
+        </a>
+        <a href="{% url 'notes' %}" class="sidebar__link">
+          <i data-lucide="notebook-pen" style="width:20px;height:20px;"></i> Notes
+        </a>
+        <a href="{% url 'community' %}" class="sidebar__link">
+          <i data-lucide="users" style="width:20px;height:20px;"></i> Community
+        </a>
+        <a href="{% url 'search' %}" class="sidebar__link">
+          <i data-lucide="search" style="width:20px;height:20px;"></i> Explore
+        </a>
+        <a href="{% url 'invoices' %}" class="sidebar__link">
+          <i data-lucide="receipt" style="width:20px;height:20px;"></i> Invoices
+        </a>
+        <a href="{% url 'profile' %}" class="sidebar__link">
+          <i data-lucide="user" style="width:20px;height:20px;"></i> Profile
+        </a>
+      </nav>
+      <div style="border-top:1px solid var(--glass-border);padding-top:var(--sp-4);margin-top:auto;">
+        <div class="flex items-center gap-3" style="padding:var(--sp-2) var(--sp-3);">
+          <div class="avatar" id="sidebarAvatar">T</div>
+          <div>
+            <div class="text-sm font-semi" id="sidebarName">Traveler</div>
+            <div class="text-xs text-muted" id="sidebarEmail">user@email.com</div>
+          </div>
+          <button class="theme-toggle" id="themeToggle" style="margin-left:auto;width:32px;height:32px;font-size:0.875rem;" aria-label="Toggle theme">
+            <i data-lucide="sun" style="width:16px;height:16px;"></i>
+          </button>
+        </div>
+        <a href="#" class="sidebar__link" style="color:var(--danger);margin-top:var(--sp-2);" onclick="fetch('/api/logout/').then(()=>window.location.href='{% url 'login' %}');">
+          <i data-lucide="log-out" style="width:20px;height:20px;"></i> Sign Out
+        </a>
+      </div>
+    </aside>
+
+    <!-- ========== MAIN CONTENT ========== -->
+    <main class="page-content">
+      <!-- Header -->
+      <div class="section-header">
+        <div>
+          <h1 class="section-header__title" id="dashGreeting">Good morning, Traveler! 👋</h1>
+          <p class="section-header__subtitle">Here's your travel dashboard overview.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <a href="{% url 'create_trip' %}" class="btn btn--primary" id="newTripBtn">
+            <i data-lucide="plus" style="width:18px;height:18px;"></i> New Trip
+          </a>
+          <button class="theme-toggle" id="themeToggleHeader" aria-label="Toggle theme" onclick="document.getElementById('themeToggle').click()">
+            <i data-lucide="sun" style="width:16px;height:16px;"></i>
+          </button>
+          <div class="topbar-profile" id="topbarProfile">
+            <button class="topbar-profile__trigger" onclick="document.getElementById('topbarProfile').classList.toggle('open')">
+              <div class="topbar-profile__avatar" id="topAvatar">T</div>
+              <div class="topbar-profile__info">
+                <div class="topbar-profile__name" id="topName">Traveler</div>
+                <div class="topbar-profile__email" id="topEmail">user@travelloop.com</div>
+              </div>
+              <i data-lucide="chevron-down" style="width:16px;height:16px;color:var(--text-dim);"></i>
+            </button>
+            <div class="topbar-profile__dropdown">
+              <a href="{% url 'profile' %}"><i data-lucide="user" style="width:16px;height:16px;"></i> My Profile</a>
+              <a href="{% url 'trips' %}"><i data-lucide="map" style="width:16px;height:16px;"></i> My Trips</a>
+              <a href="#"><i data-lucide="settings" style="width:16px;height:16px;"></i> Settings</a>
+              <div class="divider"></div>
+              <a href="#" class="danger" onclick="fetch('/api/logout/').then(()=>window.location.href='{% url 'login' %}')"><i data-lucide="log-out" style="width:16px;height:16px;"></i> Sign Out</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="grid grid-4 gap-6 mb-8">
+        <div class="glass-card glass-card--glow stat-card animate-fadeInUp delay-1">
+          <div class="stat-card__label">Active Trips</div>
+          <div class="stat-card__value text-cyan">3</div>
+          <div class="stat-card__change up">↑ 1 this month</div>
+        </div>
+        <div class="glass-card glass-card--glow stat-card animate-fadeInUp delay-2">
+          <div class="stat-card__label">Cities Visited</div>
+          <div class="stat-card__value text-teal">12</div>
+          <div class="stat-card__change up">↑ 4 this year</div>
+        </div>
+        <div class="glass-card glass-card--glow stat-card animate-fadeInUp delay-3">
+          <div class="stat-card__label">Total Budget</div>
+          <div class="stat-card__value text-purple">$4,280</div>
+          <div class="stat-card__change down">↓ 12% saved</div>
+        </div>
+        <div class="glass-card glass-card--glow stat-card animate-fadeInUp delay-4">
+          <div class="stat-card__label">Days Until Next Trip</div>
+          <div class="stat-card__value" style="color:var(--warning);">18</div>
+          <div class="stat-card__change" style="color:var(--text-muted);">Tokyo Adventure</div>
+        </div>
+      </div>
+
+      <!-- Charts row -->
+      <div class="grid grid-2 gap-6 mb-8">
+        <div class="glass-card glass-card--glow p-6 animate-fadeInUp delay-3">
+          <h3 class="font-display font-bold mb-4">Budget Breakdown</h3>
+          <div style="position:relative;height:280px;">
+            <canvas id="budgetChart"></canvas>
+          </div>
+        </div>
+        <div class="glass-card glass-card--glow p-6 animate-fadeInUp delay-4">
+          <h3 class="font-display font-bold mb-4">Monthly Spending</h3>
+          <div style="position:relative;height:280px;">
+            <canvas id="spendingChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upcoming trips -->
+      <div class="mb-8">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="font-display font-bold text-xl">Upcoming Trips</h3>
+          <a href="{% url 'trips' %}" class="text-sm text-cyan">View All →</a>
+        </div>
+        <div class="grid grid-3 gap-6" id="tripsGrid">
+          <!-- Trip cards injected by JS -->
+        </div>
+      </div>
+
+      <!-- Timeline preview -->
+      <div class="glass-card glass-card--glow p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="font-display font-bold text-xl">Tokyo Itinerary</h3>
+          <span class="badge badge--budget">Budget Trip</span>
+        </div>
+        <div class="timeline" id="dashTimeline"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- AI Chat Widget -->
+  <div class="ai-chat" id="aiChat">
+    <div class="ai-chat__panel glass-card glass-card--glow" id="aiChatPanel">
+      <div class="ai-chat__header">
+        <div class="ai-dot"></div>
+        <h4>Nova Travel AI</h4>
+      </div>
+      <div class="ai-chat__messages" id="aiChatMessages">
+        <div class="ai-msg ai-msg--bot">👋 Hi! I'm <strong>Nova</strong>. Need help with your trips?</div>
+      </div>
+      <div class="ai-chat__input-wrap">
+        <input type="text" placeholder="Ask Nova anything..." id="aiChatInput" />
+        <button id="aiChatSend">Send</button>
+      </div>
+    </div>
+    <button class="ai-chat__toggle" id="aiChatToggle" aria-label="Open AI Chat">
+      <i data-lucide="bot"></i>
+    </button>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="{% static 'js/app.js' %}"></script>
+  <script src="{% static 'js/dashboard.js' %}"></script>
+</body>
+</html>

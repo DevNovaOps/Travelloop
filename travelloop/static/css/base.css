@@ -1,0 +1,488 @@
+/* ===================================================
+   TRAVELOOP — Base / Reset / Global Styles
+   =================================================== */
+@import url('./design-tokens.css');
+
+/* ---------- Reset ---------- */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text);
+  background-color: var(--bg-main);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background-color var(--duration-slow) var(--ease-smooth),
+              color var(--duration-slow) var(--ease-smooth);
+}
+
+a {
+  color: var(--cyan);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-smooth);
+}
+a:hover { color: var(--teal); }
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  border: none;
+  outline: none;
+  background: none;
+}
+
+ul, ol { list-style: none; }
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+::selection {
+  background: var(--cyan);
+  color: var(--bg-main);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-secondary); }
+::-webkit-scrollbar-thumb {
+  background: var(--text-dim);
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ==========================================
+   Layout Utilities
+   ========================================== */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--sp-6);
+}
+
+.container--narrow { max-width: 960px; }
+.container--wide   { max-width: 1440px; }
+
+.section {
+  padding: var(--sp-20) 0;
+}
+
+.section--tight {
+  padding: var(--sp-12) 0;
+}
+
+/* Flex helpers */
+.flex        { display: flex; }
+.flex-col    { flex-direction: column; }
+.flex-wrap   { flex-wrap: wrap; }
+.items-center { align-items: center; }
+.items-start  { align-items: flex-start; }
+.justify-center  { justify-content: center; }
+.justify-between { justify-content: space-between; }
+.gap-2  { gap: var(--sp-2); }
+.gap-3  { gap: var(--sp-3); }
+.gap-4  { gap: var(--sp-4); }
+.gap-6  { gap: var(--sp-6); }
+.gap-8  { gap: var(--sp-8); }
+
+/* Grid helpers */
+.grid { display: grid; }
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+
+/* Text utilities */
+.text-center { text-align: center; }
+.text-sm     { font-size: 0.875rem; }
+.text-xs     { font-size: 0.75rem; }
+.text-lg     { font-size: 1.125rem; }
+.text-xl     { font-size: 1.25rem; }
+.text-2xl    { font-size: 1.5rem; }
+.text-3xl    { font-size: 2rem; }
+.text-muted  { color: var(--text-muted); }
+.text-dim    { color: var(--text-dim); }
+.text-cyan   { color: var(--cyan); }
+.text-purple { color: var(--purple); }
+.text-teal   { color: var(--teal); }
+.font-display { font-family: var(--font-display); }
+.font-bold   { font-weight: 700; }
+.font-semi   { font-weight: 600; }
+.font-medium { font-weight: 500; }
+
+/* Spacing */
+.mt-2  { margin-top: var(--sp-2); }
+.mt-4  { margin-top: var(--sp-4); }
+.mt-6  { margin-top: var(--sp-6); }
+.mt-8  { margin-top: var(--sp-8); }
+.mb-2  { margin-bottom: var(--sp-2); }
+.mb-4  { margin-bottom: var(--sp-4); }
+.mb-6  { margin-bottom: var(--sp-6); }
+.mb-8  { margin-bottom: var(--sp-8); }
+.p-4   { padding: var(--sp-4); }
+.p-6   { padding: var(--sp-6); }
+.p-8   { padding: var(--sp-8); }
+
+/* Display */
+.hidden   { display: none !important; }
+.block    { display: block; }
+.relative { position: relative; }
+
+/* ==========================================
+   Component: Glass Card
+   ========================================== */
+.glass-card {
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  transition: transform var(--duration-base) var(--ease-smooth),
+              box-shadow var(--duration-base) var(--ease-smooth),
+              background var(--duration-base) var(--ease-smooth);
+}
+
+.glass-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-glow);
+  background: var(--glass-bg-hover);
+}
+
+.glass-card--glow {
+  border-color: var(--border-glow);
+}
+.glass-card--glow:hover {
+  box-shadow: var(--shadow-glow-strong);
+}
+
+/* ==========================================
+   Component: Buttons
+   ========================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-6);
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--duration-base) var(--ease-smooth);
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity var(--duration-fast);
+}
+.btn:hover::after { opacity: 1; }
+
+.btn--primary {
+  background: linear-gradient(135deg, var(--cyan-dark), var(--teal));
+  color: var(--bg-main);
+  box-shadow: 0 4px 16px rgba(6, 182, 212, 0.30);
+}
+.btn--primary:hover {
+  box-shadow: 0 6px 24px rgba(6, 182, 212, 0.45);
+  transform: translateY(-2px);
+}
+
+.btn--secondary {
+  background: transparent;
+  color: var(--cyan);
+  border: 1px solid var(--border-glow);
+}
+.btn--secondary:hover {
+  background: rgba(6, 182, 212, 0.08);
+  border-color: var(--cyan);
+  color: var(--cyan);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--text-muted);
+}
+.btn--ghost:hover {
+  color: var(--text);
+  background: rgba(255,255,255,0.05);
+}
+
+.btn--purple {
+  background: linear-gradient(135deg, var(--purple), #6D28D9);
+  color: white;
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.30);
+}
+.btn--purple:hover {
+  box-shadow: 0 6px 24px rgba(139, 92, 246, 0.45);
+  transform: translateY(-2px);
+}
+
+.btn--danger {
+  background: linear-gradient(135deg, var(--danger), #DC2626);
+  color: white;
+}
+
+.btn--lg {
+  padding: var(--sp-4) var(--sp-8);
+  font-size: 1.0625rem;
+  border-radius: var(--radius-lg);
+}
+
+.btn--sm {
+  padding: var(--sp-2) var(--sp-4);
+  font-size: 0.8125rem;
+}
+
+.btn--icon {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: var(--radius-full);
+}
+
+/* ==========================================
+   Component: Input / Form
+   ========================================== */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+
+.form-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  font-family: var(--font-display);
+}
+
+.form-input {
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
+}
+
+.form-input:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.12);
+}
+
+.form-input::placeholder {
+  color: var(--text-dim);
+}
+
+.form-input--lg {
+  padding: var(--sp-4) var(--sp-5);
+  font-size: 1.0625rem;
+}
+
+textarea.form-input {
+  resize: vertical;
+  min-height: 100px;
+}
+
+select.form-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2394A3B8' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 40px;
+}
+
+/* ==========================================
+   Component: Badges / Tags
+   ========================================== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-1) var(--sp-3);
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  font-family: var(--font-display);
+}
+
+.badge--cyan {
+  background: rgba(34, 211, 238, 0.12);
+  color: var(--cyan);
+}
+.badge--purple {
+  background: rgba(139, 92, 246, 0.12);
+  color: var(--purple);
+}
+.badge--teal {
+  background: rgba(20, 184, 166, 0.12);
+  color: var(--teal);
+}
+.badge--warning {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--warning);
+}
+.badge--success {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--success);
+}
+.badge--danger {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--danger);
+}
+
+/* Mood badges */
+.badge--adventure { background: rgba(249,115,22,0.12); color: var(--mood-adventure); }
+.badge--luxury    { background: rgba(139,92,246,0.12); color: var(--mood-luxury); }
+.badge--nature    { background: rgba(34,197,94,0.12); color: var(--mood-nature); }
+.badge--budget    { background: rgba(34,211,238,0.12); color: var(--mood-budget); }
+.badge--nightlife { background: rgba(236,72,153,0.12); color: var(--mood-nightlife); }
+
+/* ==========================================
+   Component: Avatar
+   ========================================== */
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 1rem;
+  background: linear-gradient(135deg, var(--cyan-dark), var(--purple));
+  color: white;
+  flex-shrink: 0;
+}
+.avatar--lg { width: 64px; height: 64px; font-size: 1.5rem; }
+.avatar--xl { width: 96px; height: 96px; font-size: 2rem; }
+
+/* ==========================================
+   Animation Utility Classes
+   ========================================== */
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s var(--ease-smooth) both;
+}
+.animate-fadeIn {
+  animation: fadeIn 0.5s var(--ease-smooth) both;
+}
+.animate-scaleIn {
+  animation: scaleIn 0.4s var(--ease-smooth) both;
+}
+.animate-slideInRight {
+  animation: slideInRight 0.5s var(--ease-smooth) both;
+}
+.animate-slideInLeft {
+  animation: slideInLeft 0.5s var(--ease-smooth) both;
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+.animate-floatSlow {
+  animation: floatSlow 8s ease-in-out infinite;
+}
+
+/* Staggered delays */
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+.delay-5 { animation-delay: 0.5s; }
+.delay-6 { animation-delay: 0.6s; }
+
+/* ==========================================
+   Background Effects
+   ========================================== */
+.bg-blobs {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.12;
+  animation: blobMove 20s ease-in-out infinite;
+}
+
+.blob--1 {
+  width: 500px; height: 500px;
+  background: var(--cyan);
+  top: -100px; left: -100px;
+  animation-delay: 0s;
+}
+.blob--2 {
+  width: 400px; height: 400px;
+  background: var(--purple);
+  top: 40%; right: -80px;
+  animation-delay: -7s;
+}
+.blob--3 {
+  width: 350px; height: 350px;
+  background: var(--teal);
+  bottom: -60px; left: 30%;
+  animation-delay: -14s;
+}
+
+/* Star particles background */
+.stars-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+}
+
+/* ==========================================
+   Responsive
+   ========================================== */
+@media (max-width: 1024px) {
+  .grid-4 { grid-template-columns: repeat(2, 1fr); }
+  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 768px) {
+  .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+  .container { padding: 0 var(--sp-4); }
+  .section { padding: var(--sp-12) 0; }
+  .hidden-mobile { display: none !important; }
+}
+
+@media (max-width: 480px) {
+  html { font-size: 14px; }
+}

@@ -1,0 +1,233 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel — Travelloop</title>
+  <meta name="description" content="Admin dashboard for managing users, cities, activities, and analytics." />
+  <link rel="icon" href="{% static 'assets/images/logo.svg' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/components.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/pages.css' %}" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <div class="page-layout">
+    <aside class="page-sidebar" id="sidebar">
+      <a href="{% url 'index' %}" class="sidebar__brand">
+        <div class="tl-logo tl-logo--sm"><img src="{% static 'assets/images/logo.svg' %}" alt="Travelloop" /></div>
+        <span class="tl-brand-text" style="font-size:1.25rem;"><span class="text-travel">Travel</span><span class="text-loop">l<span class="text-oo">oo</span>p</span></span>
+      </a>
+      <nav class="sidebar__nav">
+        <a href="{% url 'dashboard' %}" class="sidebar__link"><i data-lucide="layout-dashboard" style="width:20px;height:20px;"></i> Overview</a>
+        <a href="{% url 'trips' %}" class="sidebar__link"><i data-lucide="map" style="width:20px;height:20px;"></i> My Trips</a>
+        <a href="{% url 'admin_panel' %}" class="sidebar__link active"><i data-lucide="shield" style="width:20px;height:20px;"></i> Admin Panel</a>
+        <a href="{% url 'community' %}" class="sidebar__link"><i data-lucide="users" style="width:20px;height:20px;"></i> Community</a>
+        <a href="{% url 'profile' %}" class="sidebar__link"><i data-lucide="user" style="width:20px;height:20px;"></i> Profile</a>
+      </nav>
+      <div style="border-top:1px solid var(--glass-border);padding-top:var(--sp-4);margin-top:auto;">
+        <div class="flex items-center gap-3" style="padding:var(--sp-2) var(--sp-3);">
+          <div class="avatar" style="background:linear-gradient(135deg,var(--warning),var(--danger));">A</div>
+          <div><div class="text-sm font-semi">Admin</div><div class="text-xs text-muted">admin@travelloop.com</div></div>
+          <button class="theme-toggle" id="themeToggle" style="margin-left:auto;width:32px;height:32px;" aria-label="Toggle theme"><i data-lucide="sun" style="width:16px;height:16px;"></i></button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="page-content">
+      <!-- Search Toolbar -->
+      <div class="search-toolbar">
+        <i data-lucide="search" style="width:18px;height:18px;color:var(--text-dim);flex-shrink:0;"></i>
+        <input class="search-toolbar__input" type="text" placeholder="Search admin panel..." />
+        <div class="search-toolbar__actions">
+          <button class="toolbar-btn"><i data-lucide="filter" style="width:14px;height:14px;"></i> Filter</button>
+          <button class="toolbar-btn"><i data-lucide="arrow-up-down" style="width:14px;height:14px;"></i> Sort by</button>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <div>
+          <h1 class="section-header__title">Admin Panel</h1>
+          <p class="section-header__subtitle">Manage users, analytics, and platform data</p>
+        </div>
+        <span class="badge badge--warning" style="font-size:0.8rem;padding:var(--sp-2) var(--sp-4);"><i data-lucide="shield" style="width:14px;height:14px;"></i> Admin Access</span>
+      </div>
+
+      <!-- Admin Tabs -->
+      <div class="admin-tabs" id="adminTabs">
+        <button class="admin-tab active" data-tab="users">Manage Users</button>
+        <button class="admin-tab" data-tab="cities">Popular Cities</button>
+        <button class="admin-tab" data-tab="activities">Popular Activities</button>
+        <button class="admin-tab" data-tab="analytics">User Trends and Analytics</button>
+      </div>
+
+      <!-- Tab Content: Users -->
+      <div class="admin-tab-content" id="tab-users">
+        <div class="glass-card glass-card--glow p-6 animate-fadeInUp">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-display font-bold">All Users <span class="text-dim text-sm font-medium">(247 total)</span></h3>
+            <button class="btn btn--secondary btn--sm"><i data-lucide="download" style="width:14px;height:14px;"></i> Export</button>
+          </div>
+          <table class="admin-table">
+            <thead>
+              <tr><th>User</th><th>Email</th><th>Trips</th><th>Status</th><th>Joined</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><div class="flex items-center gap-2"><div class="avatar" style="width:28px;height:28px;font-size:0.7rem;">SC</div> Sarah Chen</div></td><td class="text-muted">sarah@example.com</td><td>8</td><td><span class="badge badge--success">Active</span></td><td class="text-dim">Jan 2026</td><td><button class="btn btn--ghost btn--sm"><i data-lucide="more-horizontal" style="width:14px;height:14px;"></i></button></td></tr>
+              <tr><td><div class="flex items-center gap-2"><div class="avatar" style="width:28px;height:28px;font-size:0.7rem;">MR</div> Marco Rodriguez</div></td><td class="text-muted">marco@example.com</td><td>12</td><td><span class="badge badge--success">Active</span></td><td class="text-dim">Nov 2025</td><td><button class="btn btn--ghost btn--sm"><i data-lucide="more-horizontal" style="width:14px;height:14px;"></i></button></td></tr>
+              <tr><td><div class="flex items-center gap-2"><div class="avatar" style="width:28px;height:28px;font-size:0.7rem;">AP</div> Aisha Patel</div></td><td class="text-muted">aisha@example.com</td><td>5</td><td><span class="badge badge--success">Active</span></td><td class="text-dim">Mar 2026</td><td><button class="btn btn--ghost btn--sm"><i data-lucide="more-horizontal" style="width:14px;height:14px;"></i></button></td></tr>
+              <tr><td><div class="flex items-center gap-2"><div class="avatar" style="width:28px;height:28px;font-size:0.7rem;">JO</div> James O'Brien</div></td><td class="text-muted">james@example.com</td><td>3</td><td><span class="badge badge--warning">Inactive</span></td><td class="text-dim">Dec 2025</td><td><button class="btn btn--ghost btn--sm"><i data-lucide="more-horizontal" style="width:14px;height:14px;"></i></button></td></tr>
+              <tr><td><div class="flex items-center gap-2"><div class="avatar" style="width:28px;height:28px;font-size:0.7rem;">LK</div> Lisa Kim</div></td><td class="text-muted">lisa@example.com</td><td>15</td><td><span class="badge badge--success">Active</span></td><td class="text-dim">Oct 2025</td><td><button class="btn btn--ghost btn--sm"><i data-lucide="more-horizontal" style="width:14px;height:14px;"></i></button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tab Content: Cities -->
+      <div class="admin-tab-content" id="tab-cities" style="display:none;">
+        <div class="grid grid-2 gap-6 animate-fadeInUp">
+          <div class="glass-card glass-card--glow p-6">
+            <h3 class="font-display font-bold mb-4">Popular Cities by User Visits</h3>
+            <div style="height:300px;"><canvas id="citiesChart"></canvas></div>
+          </div>
+          <div class="glass-card glass-card--glow p-6">
+            <h3 class="font-display font-bold mb-4">Top Cities This Month</h3>
+            <div class="flex flex-col gap-3">
+              <div class="flex justify-between items-center p-4" style="background:var(--bg-secondary);border-radius:var(--radius-md);"><span class="font-semi">🇫🇷 Paris</span><span class="text-cyan font-bold">2,847 visits</span></div>
+              <div class="flex justify-between items-center p-4" style="background:var(--bg-secondary);border-radius:var(--radius-md);"><span class="font-semi">🇯🇵 Tokyo</span><span class="text-purple font-bold">2,234 visits</span></div>
+              <div class="flex justify-between items-center p-4" style="background:var(--bg-secondary);border-radius:var(--radius-md);"><span class="font-semi">🇮🇩 Bali</span><span class="text-teal font-bold">1,892 visits</span></div>
+              <div class="flex justify-between items-center p-4" style="background:var(--bg-secondary);border-radius:var(--radius-md);"><span class="font-semi">🇬🇷 Santorini</span><span class="text-cyan font-bold">1,567 visits</span></div>
+              <div class="flex justify-between items-center p-4" style="background:var(--bg-secondary);border-radius:var(--radius-md);"><span class="font-semi">🇦🇪 Dubai</span><span class="text-purple font-bold">1,345 visits</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content: Activities -->
+      <div class="admin-tab-content" id="tab-activities" style="display:none;">
+        <div class="grid grid-2 gap-6 animate-fadeInUp">
+          <div class="glass-card glass-card--glow p-6">
+            <h3 class="font-display font-bold mb-4">Activity Categories</h3>
+            <div style="height:300px;"><canvas id="activitiesChart"></canvas></div>
+          </div>
+          <div class="glass-card glass-card--glow p-6">
+            <h3 class="font-display font-bold mb-4">Trending Activities</h3>
+            <div class="flex flex-col gap-3">
+              <div class="flex justify-between items-center p-4" style="background:var(--bg-secondary);border-radius:var(--radius-md);"><span class="font-semi">🏛️ Museum Tours</span><span class="badge badge--success">↑ 23%</span></div>
+              <div class="flex justify-between items-center p-4" style="background:var(--bg-secondary);border-radius:var(--radius-md);"><span class="font-semi">🍽️ Food Tours</span><span class="badge badge--success">↑ 18%</span></div>
+              <div class="flex justify-between items-center p-4" style="background:var(--bg-secondary);border-radius:var(--radius-md);"><span class="font-semi">🏔️ Hiking</span><span class="badge badge--success">↑ 15%</span></div>
+              <div class="flex justify-between items-center p-4" style="background:var(--bg-secondary);border-radius:var(--radius-md);"><span class="font-semi">🏖️ Beach Activities</span><span class="badge badge--warning">↓ 5%</span></div>
+              <div class="flex justify-between items-center p-4" style="background:var(--bg-secondary);border-radius:var(--radius-md);"><span class="font-semi">🎭 Cultural Shows</span><span class="badge badge--success">↑ 12%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab Content: Analytics -->
+      <div class="admin-tab-content" id="tab-analytics" style="display:none;">
+        <div class="grid grid-4 gap-4 mb-6 animate-fadeInUp">
+          <div class="glass-card glass-card--glow stat-card">
+            <div class="stat-card__label">Total Users</div>
+            <div class="stat-card__value text-cyan">8,642</div>
+            <div class="stat-card__change up">↑ 12% this month</div>
+          </div>
+          <div class="glass-card glass-card--glow stat-card">
+            <div class="stat-card__label">Active Trips</div>
+            <div class="stat-card__value text-teal">1,234</div>
+            <div class="stat-card__change up">↑ 8% this month</div>
+          </div>
+          <div class="glass-card glass-card--glow stat-card">
+            <div class="stat-card__label">Revenue</div>
+            <div class="stat-card__value text-purple">$48.2K</div>
+            <div class="stat-card__change up">↑ 22% this month</div>
+          </div>
+          <div class="glass-card glass-card--glow stat-card">
+            <div class="stat-card__label">Avg Rating</div>
+            <div class="stat-card__value" style="color:var(--warning);">4.8</div>
+            <div class="stat-card__change up">↑ 0.2 this month</div>
+          </div>
+        </div>
+        <div class="grid grid-2 gap-6 animate-fadeInUp delay-2">
+          <div class="glass-card glass-card--glow p-6">
+            <h3 class="font-display font-bold mb-4">User Growth</h3>
+            <div style="height:300px;"><canvas id="growthChart"></canvas></div>
+          </div>
+          <div class="glass-card glass-card--glow p-6">
+            <h3 class="font-display font-bold mb-4">Revenue Trends</h3>
+            <div style="height:300px;"><canvas id="revenueChart"></canvas></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="{% static 'js/app.js' %}"></script>
+  <script>
+    // Tab switching
+    document.querySelectorAll('.admin-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        document.querySelectorAll('.admin-tab-content').forEach(c => c.style.display = 'none');
+        const target = document.getElementById('tab-' + tab.dataset.tab);
+        if (target) {
+          target.style.display = 'block';
+          // Init charts on first view
+          if (tab.dataset.tab === 'cities' && !window._citiesInit) { initCitiesChart(); window._citiesInit = true; }
+          if (tab.dataset.tab === 'activities' && !window._actInit) { initActivitiesChart(); window._actInit = true; }
+          if (tab.dataset.tab === 'analytics' && !window._analyticsInit) { initAnalyticsCharts(); window._analyticsInit = true; }
+        }
+      });
+    });
+
+    const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+    const textColor = isDark ? '#94A3B8' : '#475569';
+    const gridColor = isDark ? 'rgba(148,163,184,0.08)' : 'rgba(15,23,42,0.06)';
+
+    function initCitiesChart() {
+      new Chart(document.getElementById('citiesChart'), {
+        type: 'doughnut',
+        data: {
+          labels: ['Paris','Tokyo','Bali','Santorini','Dubai','Others'],
+          datasets: [{ data: [2847,2234,1892,1567,1345,3200], backgroundColor: ['#06B6D4','#8B5CF6','#14B8A6','#F59E0B','#EC4899','#64748B'], borderColor: isDark ? '#0F172A' : '#FFF', borderWidth: 3 }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom', labels: { color: textColor, padding: 12, usePointStyle: true, font: { family: 'Inter', size: 11 } } } } }
+      });
+    }
+
+    function initActivitiesChart() {
+      new Chart(document.getElementById('activitiesChart'), {
+        type: 'bar',
+        data: {
+          labels: ['Museums','Food Tours','Hiking','Beach','Culture','Shopping'],
+          datasets: [{ data: [3200,2800,2400,2100,1800,1500], backgroundColor: ['#06B6D4','#8B5CF6','#14B8A6','#F59E0B','#EC4899','#22C55E'], borderRadius: 8, borderSkipped: false }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: textColor } }, y: { grid: { color: gridColor }, ticks: { color: textColor }, border: { display: false } } } }
+      });
+    }
+
+    function initAnalyticsCharts() {
+      new Chart(document.getElementById('growthChart'), {
+        type: 'line',
+        data: {
+          labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+          datasets: [{ label: 'Users', data: [4200,4800,5600,6400,7500,8642], borderColor: '#06B6D4', backgroundColor: 'rgba(6,182,212,0.1)', fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#06B6D4' }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: textColor } }, y: { grid: { color: gridColor }, ticks: { color: textColor }, border: { display: false } } } }
+      });
+
+      new Chart(document.getElementById('revenueChart'), {
+        type: 'bar',
+        data: {
+          labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+          datasets: [{ label: 'Revenue ($K)', data: [22,28,32,38,42,48.2], backgroundColor: ctx => { const g = ctx.chart.ctx.createLinearGradient(0,0,0,300); g.addColorStop(0,'rgba(139,92,246,0.7)'); g.addColorStop(1,'rgba(34,211,238,0.3)'); return g; }, borderRadius: 8, borderSkipped: false }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { color: textColor } }, y: { grid: { color: gridColor }, ticks: { color: textColor, callback: v => `$${v}K` }, border: { display: false } } } }
+      });
+    }
+  </script>
+</body>
+</html>

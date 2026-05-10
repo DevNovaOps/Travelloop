@@ -1,0 +1,291 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile — Travelloop</title>
+  <meta name="description" content="Your Travelloop profile — manage your details, view trip history and preplanned trips." />
+  <link rel="icon" href="{% static 'assets/images/logo.svg' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/components.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/pages.css' %}" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="page-layout">
+    <aside class="page-sidebar" id="sidebar">
+      <a href="{% url 'index' %}" class="sidebar__brand">
+        <div class="tl-logo tl-logo--sm"><img src="{% static 'assets/images/logo.svg' %}" alt="Travelloop" /></div>
+        <span class="tl-brand-text" style="font-size:1.25rem;"><span class="text-travel">Travel</span><span class="text-loop">l<span class="text-oo">oo</span>p</span></span>
+      </a>
+      <nav class="sidebar__nav">
+        <a href="{% url 'dashboard' %}" class="sidebar__link"><i data-lucide="layout-dashboard" style="width:20px;height:20px;"></i> Overview</a>
+        <a href="{% url 'trips' %}" class="sidebar__link"><i data-lucide="map" style="width:20px;height:20px;"></i> My Trips</a>
+        <a href="{% url 'create_trip' %}" class="sidebar__link"><i data-lucide="plus-circle" style="width:20px;height:20px;"></i> New Trip</a>
+        <a href="{% url 'packing' %}" class="sidebar__link"><i data-lucide="check-square" style="width:20px;height:20px;"></i> Packing</a>
+        <a href="{% url 'notes' %}" class="sidebar__link"><i data-lucide="notebook-pen" style="width:20px;height:20px;"></i> Notes</a>
+        <a href="{% url 'community' %}" class="sidebar__link"><i data-lucide="users" style="width:20px;height:20px;"></i> Community</a>
+        <a href="{% url 'search' %}" class="sidebar__link"><i data-lucide="search" style="width:20px;height:20px;"></i> Explore</a>
+        <a href="{% url 'invoices' %}" class="sidebar__link"><i data-lucide="receipt" style="width:20px;height:20px;"></i> Invoices</a>
+        <a href="{% url 'profile' %}" class="sidebar__link active"><i data-lucide="user" style="width:20px;height:20px;"></i> Profile</a>
+      </nav>
+      <div style="border-top:1px solid var(--glass-border);padding-top:var(--sp-4);margin-top:auto;">
+        <div class="flex items-center gap-3" style="padding:var(--sp-2) var(--sp-3);">
+          <div class="avatar" id="sidebarAvatar">T</div>
+          <div><div class="text-sm font-semi" id="sidebarName">Traveler</div><div class="text-xs text-muted">user@travelloop.com</div></div>
+          <button class="theme-toggle" id="themeToggle" style="margin-left:auto;width:32px;height:32px;" aria-label="Toggle theme"><i data-lucide="sun" style="width:16px;height:16px;"></i></button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="page-content">
+      <!-- Profile Header -->
+      <div class="profile-header glass-card glass-card--glow animate-fadeInUp">
+        <div class="profile-avatar" id="profileAvatar">T</div>
+        <div class="profile-details">
+          <h2 id="profileName">Traveler</h2>
+          <p class="profile-email" id="profileEmail">user@travelloop.com</p>
+          <div class="profile-stats">
+            <div class="profile-stat">
+              <div class="profile-stat__value text-cyan">12</div>
+              <div class="profile-stat__label">Trips</div>
+            </div>
+            <div class="profile-stat">
+              <div class="profile-stat__value text-teal">24</div>
+              <div class="profile-stat__label">Cities</div>
+            </div>
+            <div class="profile-stat">
+              <div class="profile-stat__value text-purple">8</div>
+              <div class="profile-stat__label">Countries</div>
+            </div>
+          </div>
+        </div>
+        <div class="flex flex-col gap-2">
+          <button class="btn btn--secondary btn--sm" id="editProfileBtn"><i data-lucide="pencil" style="width:16px;height:16px;"></i> Edit Profile</button>
+          <button class="btn btn--ghost btn--sm"><i data-lucide="settings" style="width:16px;height:16px;"></i> Settings</button>
+        </div>
+      </div>
+
+      <!-- User Details -->
+      <div class="glass-card glass-card--glow p-6 mb-8 animate-fadeInUp delay-1">
+        <h3 class="font-display font-bold mb-4">Personal Details</h3>
+        <div class="grid grid-2 gap-4">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input class="form-input" type="text" id="profFname" readonly />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input class="form-input" type="text" id="profLname" readonly />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input class="form-input" type="email" id="profEmail2" readonly />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input class="form-input" type="tel" id="profPhone" readonly />
+          </div>
+          <div class="form-group">
+            <label class="form-label">City</label>
+            <input class="form-input" type="text" id="profCity" readonly />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Country</label>
+            <input class="form-input" type="text" id="profCountry" readonly />
+          </div>
+        </div>
+      </div>
+
+      <!-- Preplanned Trips -->
+      <div class="mb-8 animate-fadeInUp delay-2">
+        <div class="section-header" style="margin-bottom:var(--sp-4);">
+          <h3 class="font-display font-bold text-xl">Preplanned Trips</h3>
+          <a href="{% url 'trips' %}" class="text-sm text-cyan">View All →</a>
+        </div>
+        <div class="grid grid-3 gap-4" id="preplannedGrid"></div>
+      </div>
+
+      <!-- Previous Trips -->
+      <div class="animate-fadeInUp delay-3">
+        <div class="section-header" style="margin-bottom:var(--sp-4);">
+          <h3 class="font-display font-bold text-xl">Previous Trips</h3>
+        </div>
+        <div class="grid grid-3 gap-4" id="previousGrid"></div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="{% static 'js/app.js' %}"></script>
+  <script>
+    const itineraryViewUrl = "{% url 'itinerary_view' %}";
+
+    // ── Load profile from backend ──
+    async function loadProfile() {
+      try {
+        const res = await fetch('/api/profile/');
+        if (!res.ok) throw new Error('Not authenticated');
+        const user = await res.json();
+
+        const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Traveler';
+        const initial = fullName.charAt(0).toUpperCase();
+
+        document.getElementById('sidebarName').textContent = fullName;
+        document.getElementById('sidebarAvatar').textContent = initial;
+        document.getElementById('profileAvatar').textContent = initial;
+        document.getElementById('profileName').textContent = fullName;
+        document.getElementById('profileEmail').textContent = user.email || '';
+        document.getElementById('profFname').value = user.firstName || '';
+        document.getElementById('profLname').value = user.lastName || '';
+        document.getElementById('profEmail2').value = user.email || '';
+        document.getElementById('profPhone').value = user.phone || '';
+        document.getElementById('profCity').value = user.city || '';
+        document.getElementById('profCountry').value = user.country || '';
+
+        return user;
+      } catch (e) {
+        console.error('Error loading profile:', e);
+        return null;
+      }
+    }
+
+    // ── Load trips and compute real stats ──
+    async function loadTrips() {
+      try {
+        const res = await fetch('/api/trips/');
+        if (!res.ok) throw new Error('Failed to fetch trips');
+        const data = await res.json();
+        const trips = data.trips || [];
+
+        // Compute real stats
+        const tripsCount = trips.length;
+        const uniqueCities = new Set();
+        const uniqueCountries = new Set();
+        trips.forEach(t => {
+          if (t.destination) {
+            // Try to extract country from destination (e.g. "Tokyo, Japan")
+            const parts = t.destination.split(',').map(s => s.trim());
+            if (parts.length > 1) uniqueCountries.add(parts[parts.length - 1]);
+            uniqueCities.add(parts[0]);
+          }
+          if (t.cities) t.cities.forEach(c => uniqueCities.add(c));
+        });
+
+        // Update stat values
+        const statValues = document.querySelectorAll('.profile-stat__value');
+        if (statValues[0]) statValues[0].textContent = tripsCount;
+        if (statValues[1]) statValues[1].textContent = uniqueCities.size;
+        if (statValues[2]) statValues[2].textContent = uniqueCountries.size;
+
+        // Render trip grids
+        const upcoming = trips.filter(t => t.status === 'upcoming' || t.status === 'ongoing');
+        const completed = trips.filter(t => t.status === 'completed');
+
+        renderTripCards(upcoming, 'preplannedGrid');
+        renderTripCards(completed, 'previousGrid');
+
+        // Show empty state if needed
+        if (upcoming.length === 0) {
+          document.getElementById('preplannedGrid').innerHTML = `
+            <div class="glass-card p-6" style="grid-column:1/-1;text-align:center;color:var(--text-muted);">
+              <p>No upcoming trips yet.</p>
+              <a href="/create-trip/" class="btn btn--primary btn--sm" style="margin-top:var(--sp-3);">Plan a Trip</a>
+            </div>`;
+        }
+        if (completed.length === 0) {
+          document.getElementById('previousGrid').innerHTML = `
+            <div class="glass-card p-6" style="grid-column:1/-1;text-align:center;color:var(--text-muted);">
+              <p>No completed trips yet.</p>
+            </div>`;
+        }
+      } catch (e) {
+        console.error('Error loading trips:', e);
+      }
+    }
+
+    function renderTripCards(trips, gridId) {
+      const grid = document.getElementById(gridId);
+      if (!grid) return;
+      trips.forEach(t => {
+        const startDate = new Date(t.startDate);
+        const endDate = new Date(t.endDate);
+        const dateStr = `${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+        const img = t.image || '/static/assets/images/placeholder.png';
+
+        const card = document.createElement('div');
+        card.className = 'glass-card dest-card';
+        card.style.cursor = 'pointer';
+        card.onclick = () => window.location.href = itineraryViewUrl + '?trip=' + t.id;
+        card.innerHTML = `
+          <div class="dest-card__img-wrap"><img class="dest-card__img" src="${img}" alt="${t.name}" loading="lazy" onerror="this.style.display='none'" /></div>
+          <div class="dest-card__body">
+            <h3 class="dest-card__name">${t.name}</h3>
+            <div class="dest-card__meta"><span>📅 ${dateStr}</span><span>📍 ${t.destination || ''}</span></div>
+            <div style="margin-top:var(--sp-3);"><a href="${itineraryViewUrl}?trip=${t.id}" class="btn btn--secondary btn--sm" style="width:100%;">View</a></div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // ── Edit / Save profile ──
+    let isEditing = false;
+    document.getElementById('editProfileBtn').addEventListener('click', async () => {
+      if (!isEditing) {
+        // Enter edit mode
+        isEditing = true;
+        document.querySelectorAll('#profFname, #profLname, #profPhone, #profCity, #profCountry').forEach(input => {
+          input.readOnly = false;
+          input.style.borderColor = 'var(--cyan)';
+        });
+        document.getElementById('editProfileBtn').innerHTML = '<i data-lucide="save" style="width:16px;height:16px;"></i> Save';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      } else {
+        // Save to backend
+        const payload = {
+          firstName: document.getElementById('profFname').value.trim(),
+          lastName: document.getElementById('profLname').value.trim(),
+          phone: document.getElementById('profPhone').value.trim(),
+          city: document.getElementById('profCity').value.trim(),
+          country: document.getElementById('profCountry').value.trim(),
+        };
+
+        try {
+          const csrfToken = document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
+          const res = await fetch('/api/profile/', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+            body: JSON.stringify(payload),
+          });
+          if (!res.ok) throw new Error('Save failed');
+          showToast('Profile saved successfully!', 'success');
+
+          // Update header displays
+          const newName = `${payload.firstName} ${payload.lastName}`.trim();
+          document.getElementById('profileName').textContent = newName;
+          document.getElementById('sidebarName').textContent = newName;
+          document.getElementById('profileAvatar').textContent = newName.charAt(0).toUpperCase();
+          document.getElementById('sidebarAvatar').textContent = newName.charAt(0).toUpperCase();
+        } catch (e) {
+          console.error('Error saving profile:', e);
+          showToast('Failed to save profile. Please try again.', 'error');
+        }
+
+        isEditing = false;
+        document.querySelectorAll('#profFname, #profLname, #profPhone, #profCity, #profCountry').forEach(input => {
+          input.readOnly = true;
+          input.style.borderColor = '';
+        });
+        document.getElementById('editProfileBtn').innerHTML = '<i data-lucide="pencil" style="width:16px;height:16px;"></i> Edit Profile';
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      }
+    });
+
+    // ── Init ──
+    loadProfile();
+    loadTrips();
+  </script>
+</body>
+</html>

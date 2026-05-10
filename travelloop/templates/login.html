@@ -1,0 +1,125 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In — Travelloop</title>
+  <meta name="description" content="Sign in to your Travelloop account and continue planning your next adventure." />
+  <link rel="icon" href="{% static 'assets/images/logo.svg' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/components.css' %}" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <!-- Background effects -->
+  <div class="bg-blobs">
+    <div class="blob blob--1"></div>
+    <div class="blob blob--2"></div>
+    <div class="blob blob--3"></div>
+  </div>
+  <canvas class="stars-canvas" id="starsCanvas"></canvas>
+
+  <div class="auth-page">
+    <div class="auth-card glass-card glass-card--glow animate-scaleIn">
+      <!-- Logo -->
+      <div class="auth-card__header">
+        <a href="{% url 'index' %}" style="display:flex;flex-direction:column;align-items:center;gap:var(--sp-3);text-decoration:none;margin-bottom:var(--sp-6);">
+          <div class="tl-logo tl-logo--xl">
+            <img src="{% static 'assets/images/logo.svg' %}" alt="Travelloop" />
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;">
+            <span class="tl-brand-text" style="font-size:1.75rem;"><span class="text-travel">Travel</span><span class="text-loop">l<span class="text-oo">oo</span>p</span></span>
+            <span class="tl-brand-subtitle">PLAN &bull; EXPLORE &bull; EXPERIENCE</span>
+          </div>
+        </a>
+        <h2>Welcome Back</h2>
+        <p>Sign in to continue your journey</p>
+      </div>
+
+      <form class="auth-form" id="loginForm" onsubmit="return handleLogin(event)">
+        <div class="form-group">
+          <label class="form-label" for="login-email">Email Address</label>
+          <div style="position:relative;">
+            <input class="form-input" type="email" id="login-email" placeholder="traveler@example.com" required
+              style="padding-left:40px;" />
+            <i data-lucide="mail" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--text-dim);"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="login-password">Password</label>
+          <div style="position:relative;">
+            <input class="form-input" type="password" id="login-password" placeholder="••••••••" required
+              style="padding-left:40px;" />
+            <i data-lucide="lock" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--text-dim);"></i>
+          </div>
+        </div>
+
+        <div class="flex justify-between items-center">
+          <label class="flex items-center gap-2 text-sm text-muted" style="cursor:pointer;">
+            <input type="checkbox" id="remember" style="accent-color:var(--cyan);" />
+            Remember me
+          </label>
+          <a href="{% url 'forgot_password' %}" class="text-sm text-cyan">Forgot Password?</a>
+        </div>
+
+        <button type="submit" class="btn btn--primary btn--lg" style="width:100%;">
+          <i data-lucide="log-in" style="width:20px;height:20px;"></i>
+          Sign In
+        </button>
+
+        <div class="auth-form__divider">or continue with</div>
+
+        <div class="flex gap-3">
+          <button type="button" class="btn btn--secondary" style="flex:1;">
+            <i data-lucide="chrome" style="width:18px;height:18px;"></i> Google
+          </button>
+          <button type="button" class="btn btn--secondary" style="flex:1;">
+            <i data-lucide="github" style="width:18px;height:18px;"></i> GitHub
+          </button>
+        </div>
+
+        <div class="auth-form__footer">
+          Don't have an account? <a href="{% url 'register' %}">Create one</a>
+        </div>
+
+        <!-- Demo credentials hint -->
+        <div style="margin-top:var(--sp-4);padding:var(--sp-3);border-radius:var(--radius-md);background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.15);text-align:center;">
+          <div style="font-size:0.7rem;color:var(--text-dim);margin-bottom:4px;">Demo Credentials</div>
+          <div style="font-size:0.78rem;color:var(--cyan);font-family:monospace;">dev@test.com &nbsp;/&nbsp; test1234</div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="{% static 'js/app.js' %}"></script>
+  <script>
+    async function handleLogin(e) {
+      e.preventDefault();
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      if (!email || !password) return false;
+      try {
+        const res = await fetch('/api/login/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          localStorage.setItem('traveloop_user', JSON.stringify(data.user));
+          showToast('Welcome back! Redirecting...', 'success');
+          setTimeout(() => window.location.href = "{% url 'dashboard' %}", 1200);
+        } else {
+          showToast(data.error || 'Login failed', 'error');
+        }
+      } catch (err) {
+        showToast('Network error. Please try again.', 'error');
+      }
+      return false;
+    }
+  </script>
+</body>
+</html>

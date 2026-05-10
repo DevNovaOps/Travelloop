@@ -1,0 +1,246 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Itinerary View — Travelloop</title>
+  <meta name="description" content="View your trip itinerary day by day with activities and expense tracking." />
+  <link rel="icon" href="{% static 'assets/images/logo.svg' %}" />
+  <link rel="stylesheet" href="{% static 'css/base.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/components.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/pages.css' %}" />
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="page-layout">
+    <aside class="page-sidebar" id="sidebar">
+      <a href="{% url 'index' %}" class="sidebar__brand">
+        <div class="tl-logo tl-logo--sm"><img src="{% static 'assets/images/logo.svg' %}" alt="Travelloop" /></div>
+        <span class="tl-brand-text" style="font-size:1.25rem;"><span class="text-travel">Travel</span><span class="text-loop">l<span class="text-oo">oo</span>p</span></span>
+      </a>
+      <nav class="sidebar__nav">
+        <a href="{% url 'dashboard' %}" class="sidebar__link"><i data-lucide="layout-dashboard" style="width:20px;height:20px;"></i> Overview</a>
+        <a href="{% url 'trips' %}" class="sidebar__link active"><i data-lucide="map" style="width:20px;height:20px;"></i> My Trips</a>
+        <a href="{% url 'create_trip' %}" class="sidebar__link"><i data-lucide="plus-circle" style="width:20px;height:20px;"></i> New Trip</a>
+        <a href="{% url 'packing' %}" class="sidebar__link"><i data-lucide="check-square" style="width:20px;height:20px;"></i> Packing</a>
+        <a href="{% url 'notes' %}" class="sidebar__link"><i data-lucide="notebook-pen" style="width:20px;height:20px;"></i> Notes</a>
+        <a href="{% url 'community' %}" class="sidebar__link"><i data-lucide="users" style="width:20px;height:20px;"></i> Community</a>
+        <a href="{% url 'search' %}" class="sidebar__link"><i data-lucide="search" style="width:20px;height:20px;"></i> Explore</a>
+        <a href="{% url 'invoices' %}" class="sidebar__link"><i data-lucide="receipt" style="width:20px;height:20px;"></i> Invoices</a>
+        <a href="{% url 'profile' %}" class="sidebar__link"><i data-lucide="user" style="width:20px;height:20px;"></i> Profile</a>
+      </nav>
+      <div style="border-top:1px solid var(--glass-border);padding-top:var(--sp-4);margin-top:auto;">
+        <div class="flex items-center gap-3" style="padding:var(--sp-2) var(--sp-3);">
+          <div class="avatar" id="sidebarAvatar">T</div>
+          <div><div class="text-sm font-semi" id="sidebarName">Traveler</div><div class="text-xs text-muted">user@travelloop.com</div></div>
+          <button class="theme-toggle" id="themeToggle" style="margin-left:auto;width:32px;height:32px;" aria-label="Toggle theme"><i data-lucide="sun" style="width:16px;height:16px;"></i></button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="page-content">
+      <!-- Search Toolbar -->
+      <div class="search-toolbar">
+        <i data-lucide="search" style="width:18px;height:18px;color:var(--text-dim);flex-shrink:0;"></i>
+        <input class="search-toolbar__input" type="text" placeholder="Search activities..." id="activitySearch" />
+        <div class="search-toolbar__actions">
+          <button class="toolbar-btn"><i data-lucide="layout-grid" style="width:14px;height:14px;"></i> Group by</button>
+          <button class="toolbar-btn"><i data-lucide="filter" style="width:14px;height:14px;"></i> Filter</button>
+          <button class="toolbar-btn"><i data-lucide="arrow-up-down" style="width:14px;height:14px;"></i> Sort by</button>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <div>
+          <h1 class="section-header__title" id="tripTitle">Loading...</h1>
+          <p class="section-header__subtitle" id="tripSubtitle"></p>
+        </div>
+        <div class="flex gap-3" id="tripActions" style="display:none;">
+          <a href="#" class="btn btn--secondary btn--sm" id="editBtn"><i data-lucide="pencil" style="width:16px;height:16px;"></i> Edit</a>
+          <a href="{% url 'packing' %}" class="btn btn--secondary btn--sm"><i data-lucide="check-square" style="width:16px;height:16px;"></i> Packing</a>
+          <a href="{% url 'notes' %}" class="btn btn--secondary btn--sm"><i data-lucide="notebook-pen" style="width:16px;height:16px;"></i> Notes</a>
+        </div>
+      </div>
+
+      <!-- Budget Summary -->
+      <div class="grid grid-4 gap-4 mb-8">
+        <div class="glass-card glass-card--glow stat-card animate-fadeInUp delay-1">
+          <div class="stat-card__label">Total Budget</div>
+          <div class="stat-card__value text-cyan" id="statBudget">—</div>
+        </div>
+        <div class="glass-card glass-card--glow stat-card animate-fadeInUp delay-2">
+          <div class="stat-card__label">Spent So Far</div>
+          <div class="stat-card__value text-purple" id="statSpent">—</div>
+        </div>
+        <div class="glass-card glass-card--glow stat-card animate-fadeInUp delay-3">
+          <div class="stat-card__label">Remaining</div>
+          <div class="stat-card__value" style="color:var(--success);" id="statRemaining">—</div>
+        </div>
+        <div class="glass-card glass-card--glow stat-card animate-fadeInUp delay-4">
+          <div class="stat-card__label">Activities</div>
+          <div class="stat-card__value" style="color:var(--warning);" id="statActivities">—</div>
+        </div>
+      </div>
+
+      <!-- Day-by-Day Itinerary (loaded from backend) -->
+      <div id="itineraryDays">
+        <!-- Loaded dynamically -->
+      </div>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+  <script src="{% static 'js/app.js' %}"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const tripId = params.get('trip');
+
+    const iconColors = {
+      plane: { bg: 'rgba(6,182,212,0.08)', color: 'var(--cyan)' },
+      car: { bg: 'rgba(139,92,246,0.08)', color: 'var(--purple)' },
+      bed: { bg: 'rgba(20,184,166,0.08)', color: 'var(--teal)' },
+      landmark: { bg: 'rgba(6,182,212,0.08)', color: 'var(--cyan)' },
+      utensils: { bg: 'rgba(245,158,11,0.08)', color: 'var(--warning)' },
+      palette: { bg: 'rgba(139,92,246,0.08)', color: 'var(--purple)' },
+      ship: { bg: 'rgba(20,184,166,0.08)', color: 'var(--teal)' },
+      'shopping-bag': { bg: 'rgba(6,182,212,0.08)', color: 'var(--cyan)' },
+      church: { bg: 'rgba(139,92,246,0.08)', color: 'var(--purple)' },
+      wine: { bg: 'rgba(245,158,11,0.08)', color: 'var(--warning)' },
+      camera: { bg: 'rgba(20,184,166,0.08)', color: 'var(--teal)' },
+      umbrella: { bg: 'rgba(6,182,212,0.08)', color: 'var(--cyan)' },
+      mountain: { bg: 'rgba(34,197,94,0.08)', color: 'var(--success)' },
+    };
+
+    // ── User info ──
+    (async () => {
+      try {
+        const res = await fetch('/api/profile/');
+        if (res.ok) {
+          const u = await res.json();
+          const name = `${u.firstName || ''} ${u.lastName || ''}`.trim() || 'Traveler';
+          const sn = document.getElementById('sidebarName');
+          if (sn) sn.textContent = name;
+          const sa = document.getElementById('sidebarAvatar');
+          if (sa) sa.textContent = name.charAt(0).toUpperCase();
+        }
+      } catch (e) {}
+    })();
+
+    // ── Load trip from backend ──
+    async function loadItinerary() {
+      if (!tripId) {
+        document.getElementById('tripTitle').textContent = 'No Trip Selected';
+        document.getElementById('tripSubtitle').textContent = 'Go to My Trips to select a trip.';
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/trips/${tripId}/`);
+        if (!res.ok) throw new Error('Trip not found');
+        const trip = await res.json();
+
+        // Header
+        document.getElementById('tripTitle').textContent = trip.name;
+        const startDate = new Date(trip.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        const endDate = new Date(trip.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        const sectionCount = (trip.sections || []).length;
+        document.getElementById('tripSubtitle').innerHTML =
+          `${startDate} – ${endDate} · ${trip.destination} · <span class="text-cyan">$${Number(trip.budget).toLocaleString()} total budget</span>`;
+
+        // Actions
+        document.getElementById('tripActions').style.display = '';
+        document.getElementById('editBtn').href = "{% url 'build_itinerary' %}?trip=" + tripId;
+
+        // Stats
+        const totalSpent = trip.totalSpent || 0;
+        const remaining = trip.budget - totalSpent;
+        let totalActivities = 0;
+        (trip.sections || []).forEach(s => totalActivities += (s.activities || []).length);
+
+        document.getElementById('statBudget').textContent = `$${Number(trip.budget).toLocaleString()}`;
+        document.getElementById('statSpent').textContent = `$${Number(totalSpent).toLocaleString()}`;
+        document.getElementById('statRemaining').textContent = `$${Number(remaining).toLocaleString()}`;
+        document.getElementById('statActivities').textContent = totalActivities;
+
+        // Render sections as days
+        const container = document.getElementById('itineraryDays');
+        const sections = trip.sections || [];
+
+        if (sections.length === 0) {
+          container.innerHTML = `
+            <div class="glass-card glass-card--glow p-6" style="text-align:center;">
+              <p style="color:var(--text-muted);margin-bottom:var(--sp-4);">No itinerary sections yet.</p>
+              <a href="{% url 'build_itinerary' %}?trip=${tripId}" class="btn btn--primary">Build Itinerary</a>
+            </div>`;
+          return;
+        }
+
+        const gradients = [
+          'linear-gradient(135deg, var(--cyan), #0891B2)',
+          'linear-gradient(135deg, var(--purple), #6D28D9)',
+          'linear-gradient(135deg, var(--teal), #0D9488)',
+          'linear-gradient(135deg, var(--warning), #D97706)',
+        ];
+
+        sections.forEach((section, idx) => {
+          const dayEl = document.createElement('div');
+          dayEl.className = `itinerary-day animate-fadeInUp delay-${Math.min(idx + 1, 4)}`;
+
+          const dateStr = section.startDate
+            ? new Date(section.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+            : '';
+          const label = dateStr ? `${section.title} — ${dateStr}` : section.title;
+
+          let html = `
+            <div class="itinerary-day__label" style="background:${gradients[idx % gradients.length]};">
+              <i data-lucide="calendar" style="width:14px;height:14px;"></i> ${label}
+            </div>`;
+
+          const activities = section.activities || [];
+          if (activities.length > 0) {
+            html += `
+              <div class="flex mb-2" style="padding-left:var(--sp-4);gap:var(--sp-8);">
+                <span class="text-xs text-dim font-semi" style="flex:1;">ACTIVITY</span>
+                <span class="text-xs text-dim font-semi" style="width:100px;text-align:right;">EXPENSE</span>
+              </div>`;
+
+            activities.forEach((act, i) => {
+              const ic = iconColors[act.icon] || iconColors.landmark;
+              const timeStr = act.timeStart ? `${act.timeStart}${act.timeEnd ? ' – ' + act.timeEnd : ''}` : '';
+              const expense = act.expense > 0 ? `$${Number(act.expense).toLocaleString()}` : 'Free';
+
+              if (i > 0) html += '<div class="activity-connector"></div>';
+              html += `
+                <div class="activity-row">
+                  <div class="activity-row__icon" style="background:${ic.bg};color:${ic.color};"><i data-lucide="${act.icon}" style="width:18px;height:18px;"></i></div>
+                  <div class="activity-row__info">
+                    <div class="activity-row__name">${act.name}</div>
+                    ${timeStr ? `<div class="activity-row__time">${timeStr}</div>` : ''}
+                  </div>
+                  <div class="activity-row__expense">${expense}</div>
+                </div>`;
+            });
+          } else {
+            html += `
+              <div style="padding:var(--sp-4);color:var(--text-muted);font-size:0.875rem;">
+                ${section.description || 'No activities added yet.'}
+              </div>`;
+          }
+
+          dayEl.innerHTML = html;
+          container.appendChild(dayEl);
+        });
+
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+      } catch (e) {
+        console.error('Load itinerary error:', e);
+        document.getElementById('tripTitle').textContent = 'Could not load trip';
+        document.getElementById('tripSubtitle').textContent = 'Please try again or select a trip from My Trips.';
+      }
+    }
+
+    loadItinerary();
+  </script>
+</body>
+</html>
